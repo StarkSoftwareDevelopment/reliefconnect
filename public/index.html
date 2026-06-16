@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReliefConnect – Volunteer Disaster Relief Coordination</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E8521A;--orange-light:#FEF0EA;--orange-dark:#B03D10;
+  --navy:#1A2744;--navy-light:#EEF1F8;
+  --teal:#0E6E68;--teal-light:#E4F5F4;
+  --amber:#B87F1A;--amber-light:#FEF6E4;
+  --red:#C0392B;--red-light:#FDECEA;
+  --green:#1A7A4A;--green-light:#E4F7ED;
+  --gray:#6B7280;--gray-light:#F9FAFB;--border:#E5E7EB;
+  --text:#111827;--text2:#6B7280;
+  --radius:10px;--shadow:0 1px 4px rgba(0,0,0,.08);
+}
+body{font-family:'Inter',sans-serif;color:var(--text);background:#F4F5F7;min-height:100vh;font-size:15px}
+.app{display:flex;flex-direction:column;min-height:100vh}
+
+/* NAV */
+nav{background:var(--navy);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100}
+.logo{color:#fff;font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.3px;flex:1}
+.logo span{color:#F97316}
+nav button{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:.15s}
+nav button:hover{background:rgba(255,255,255,.1)}
+nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
+.alert-badge{background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;vertical-align:middle}
+
+/* PAGES */
+.page{display:none;padding:24px;max-width:960px;margin:0 auto;width:100%}
+.page.active{display:block}
+
+/* HOME HERO */
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.hero-card{background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:24px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.hero-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.hero-card .hc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:22px}
+.hc-ask .hc-icon{background:var(--red-light);color:var(--red)}
+.hc-offer .hc-icon{background:var(--green-light);color:var(--green)}
+.hc-find .hc-icon{background:var(--navy-light);color:var(--navy)}
+.hero-card h2{font-size:16px;font-weight:600;margin-bottom:6px}
+.hero-card p{font-size:13px;color:var(--text2);line-height:1.5}
+.hero-card .hc-arrow{position:absolute;bottom:16px;right:16px;color:var(--text2);font-size:18px;transition:.15s}
+.hero-card:hover .hc-arrow{color:var(--text);transform:translateX(2px)}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat{background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat .n{font-size:28px;font-weight:700;color:var(--navy)}
+.stat .l{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* SECTION HEADING */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sh h3{font-size:16px;font-weight:600}
+.sh a{font-size:13px;color:var(--orange);cursor:pointer;text-decoration:none}
+.sh a:hover{text-decoration:underline}
+
+/* MISSION CARDS */
+.mission-list{display:flex;flex-direction:column;gap:10px}
+.mcard{background:#fff;border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s}
+.mcard:hover{box-shadow:var(--shadow)}
+.mcard-top{display:flex;align-items:flex-start;gap:12px}
+.mcard-icon{width:38px;height:38px;border-radius:9px;background:var(--orange-light);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mcard-info{flex:1}
+.mcard-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.mcard-sub{font-size:12px;color:var(--text2)}
+.mcard-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-orange{background:var(--orange-light);color:var(--orange-dark)}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-teal{background:var(--teal-light);color:var(--teal)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-gray{background:#F3F4F6;color:#374151}
+.progress-bar{height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;border-radius:3px;background:var(--orange);transition:.4s}
+.progress-fill.green{background:var(--green)}
+
+/* FORMS */
+.form-card{background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.form-card h2{font-size:18px;font-weight:600;margin-bottom:4px}
+.form-card .sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:.15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#60A5FA;box-shadow:0 0 0 3px rgba(96,165,250,.15)}
+.field textarea{resize:vertical;min-height:90px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:.15s}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-primary:hover{background:var(--orange-dark)}
+.btn-secondary{background:#fff;border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{background:var(--gray-light)}
+.btn-sm{padding:6px 14px;font-size:13px}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-group{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;background:#F3F4F6;border-radius:8px;padding:4px;margin-bottom:20px}
+.tab-bar button{flex:1;padding:7px 12px;border:none;background:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:.15s}
+.tab-bar button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+/* MISSION DETAIL */
+.md-header{background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px}
+.md-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.md-meta{display:flex;gap:16px;font-size:13px;color:var(--text2);flex-wrap:wrap;margin-bottom:14px}
+.md-meta span{display:flex;align-items:center;gap:4px}
+.acceptance-list{list-style:none;margin-top:10px}
+.acceptance-list li{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.acceptance-list li:last-child{border:none}
+.acceptance-list li::before{content:'✓';color:var(--teal);font-weight:600;margin-top:1px;flex-shrink:0}
+
+/* PROJECT/TASK */
+.project-block{background:#fff;border:0.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.proj-header{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;background:#FAFAFA}
+.proj-header:hover{background:#F3F4F6}
+.proj-title{font-weight:600;font-size:14px;flex:1}
+.proj-meta{font-size:12px;color:var(--text2)}
+.proj-expand{font-size:18px;color:var(--text2);transition:.2s}
+.proj-expand.open{transform:rotate(180deg)}
+.tasks-list{padding:0 16px 14px}
+.task-item{border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:10px}
+.task-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.task-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.task-check.failed{background:var(--red);border-color:var(--red);color:#fff}
+.task-check.review{background:var(--amber);border-color:var(--amber);color:#fff}
+.task-info{flex:1}
+.task-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.task-sub{font-size:12px;color:var(--text2)}
+.task-action{font-size:12px;color:var(--orange);cursor:pointer;font-weight:500}
+.task-action:hover{text-decoration:underline}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:14px;padding:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:14px}
+
+/* ALERT STRIP */
+.alert-strip{background:var(--red-light);border:1px solid #FECACA;border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.alert-strip .al-icon{color:var(--red);font-size:18px;margin-top:1px;flex-shrink:0}
+.alert-strip .al-text{font-size:13px;flex:1}
+.alert-strip .al-text strong{display:block;margin-bottom:2px}
+
+/* REVIEW BLOCK */
+.review-block{background:#F9FAFB;border:0.5px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
+.review-block .rv-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px}
+.review-block p{font-size:13px;color:var(--text);line-height:1.5}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty i{font-size:36px;display:block;margin-bottom:10px;color:#D1D5DB}
+.empty p{font-size:14px}
+
+/* AI output */
+.ai-output{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px;margin-top:12px}
+.ai-output .ai-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.ai-output pre{white-space:pre-wrap;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text)}
+
+.pm-copy{background:#EEF1F8;border:1px solid #C7D2FE;border-radius:10px;padding:14px;margin-top:12px}
+.pm-copy .pm-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--navy);margin-bottom:8px}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.file-upload-area{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;color:var(--text2);font-size:13px;transition:.15s}
+.file-upload-area:hover{border-color:#60A5FA;color:var(--text)}
+.file-upload-area i{font-size:24px;display:block;margin-bottom:6px}
+
+/* SETTINGS */
+.settings-section{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.settings-section h3{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;background:#fff;color:var(--text);outline:none}
+.filter-bar select:focus,.filter-bar input:focus{border-color:#60A5FA}
+
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;background:#F3F4F6;color:#374151;margin:2px}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .hero-grid{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .field-row{grid-template-columns:1fr}
+  nav{padding:0 14px;gap:8px}
+  nav button{padding:5px 10px;font-size:12px}
+  .page{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<nav>
+  <div class="logo">Relief<span>Connect</span></div>
+  <button onclick="showPage('home')" class="active" id="nav-home"><i class="ti ti-home"></i></button>
+  <button onclick="showPage('ask')" id="nav-ask"><i class="ti ti-hand-stop"></i> Ask</button>
+  <button onclick="showPage('offer')" id="nav-offer"><i class="ti ti-heart-handshake"></i> Offer</button>
+  <button onclick="showPage('missions')" id="nav-missions"><i class="ti ti-map"></i> Missions</button>
+  <button onclick="showPage('coordinator')" id="nav-coordinator"><i class="ti ti-layout-dashboard"></i> Coordinator <span class="alert-badge" id="alert-count" style="display:none">0</span></button>
+  <button onclick="showPage('settings')" id="nav-settings"><i class="ti ti-settings"></i></button>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div style="padding:8px 0 20px">
+    <div style="font-family:'DM Serif Display',serif;font-size:28px;line-height:1.2;margin-bottom:6px">Coordinating relief,<br><span style="color:var(--orange)">one mission at a time.</span></div>
+    <div style="font-size:14px;color:var(--text2)">Connecting people in need with volunteers ready to act.</div>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-card hc-ask" onclick="showPage('ask')">
+      <div class="hc-icon"><i class="ti ti-sos" aria-hidden="true"></i></div>
+      <h2>Ask for help</h2>
+      <p>Tell us what you need. Please be as detailed as possible and include photos and videos if you can.</p>
+      <i class="ti ti-arrow-right hc-arrow" aria-hidden="true"></i>
+    </div>
+    <div class="hero-card hc-offer" onclick="showPage('offer')">
+      <div class="hc-icon"><i class="ti ti-heart-handshake" aria-hidden="true"></i></div>
+      <h2>Offer help</h2>
+      <p>Offer your time, tools, and/or treasure to help others. Specify available times, skills, credentials, and resources.</p>
+      <i class="ti ti-arrow-right hc-arrow" aria-hidden="true"></i>
+    </div>
+    <div class="hero-card hc-find" onclick="showPage('missions')">
+      <div class="hc-icon"><i class="ti ti-map-pin" aria-hidden="true"></i></div>
+      <h2>Find a mission</h2>
+      <p>Browse scoped and scheduled volunteer opportunities you can sign up to complete.</p>
+      <i class="ti ti-arrow-right hc-arrow" aria-hidden="true"></i>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="n" id="stat-missions">0</div><div class="l">Active missions</div></div>
+    <div class="stat"><div class="n" id="stat-volunteers">0</div><div class="l">Volunteers enrolled</div></div>
+    <div class="stat"><div class="n" id="stat-completed">0</div><div class="l">Tasks completed</div></div>
+    <div class="stat"><div class="n" id="stat-asks">0</div><div class="l">Requests received</div></div>
+  </div>
+  <div class="sh"><h3>Recent missions</h3><a onclick="showPage('missions')">View all →</a></div>
+  <div class="mission-list" id="home-missions"></div>
+</div>
+
+<!-- ASK FOR HELP -->
+<div class="page" id="page-ask">
+  <div class="form-card">
+    <h2><i class="ti ti-sos" style="color:var(--red)"></i> Ask for help</h2>
+    <div class="sub">Tell us what you need. Please be as detailed as possible and include photos and videos if you can. The more detail you provide, the faster we can organize a mission to help.</div>
+    <div class="field"><label>Your name *</label><input id="ask-name" placeholder="Full name" type="text"></div>
+    <div class="field-row">
+      <div class="field"><label>Phone</label><input id="ask-phone" placeholder="(555) 000-0000" type="tel"></div>
+      <div class="field"><label>Email</label><input id="ask-email" placeholder="you@email.com" type="email"></div>
+    </div>
+    <div class="field"><label>Address / Location *</label><input id="ask-address" placeholder="Street address, city, state, ZIP"></div>
+    <div class="field"><label>What do you need help with? *</label><textarea id="ask-desc" placeholder="Describe your situation in as much detail as possible. What happened? What is damaged? What do you need most urgently? Are there any hazards or access restrictions?"></textarea></div>
+    <div class="field"><label>Category</label>
+      <select id="ask-category">
+        <option value="">Select category...</option>
+        <option>Home repair</option><option>Debris removal</option><option>Food &amp; water</option>
+        <option>Medical assistance</option><option>Transportation</option><option>Temporary shelter</option>
+        <option>Utilities restoration</option><option>Emotional support</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Urgency</label>
+      <select id="ask-urgency">
+        <option value="medium">Medium – within a few days</option>
+        <option value="high">High – within 24 hours</option>
+        <option value="critical">Critical – immediate danger</option>
+        <option value="low">Low – within a week or more</option>
+      </select>
+    </div>
+    <div class="field"><label>Number of people affected</label><input id="ask-people" placeholder="e.g. 4 (family of 4)" type="text"></div>
+    <div class="field">
+      <label>Photos &amp; videos</label>
+      <div class="file-upload-area" onclick="document.getElementById('ask-files').click()">
+        <i class="ti ti-photo-plus" aria-hidden="true"></i>
+        Tap to add photos or videos (optional but very helpful)
+      </div>
+      <input id="ask-files" type="file" multiple accept="image/*,video/*" style="display:none" onchange="showFileNames('ask-files','ask-file-list')">
+      <div id="ask-file-list" style="margin-top:6px;font-size:12px;color:var(--text2)"></div>
+    </div>
+    <div class="field"><label>Any special access instructions or safety hazards?</label><textarea id="ask-access" placeholder="Gate codes, dangerous areas, structural concerns, animals, etc." style="min-height:60px"></textarea></div>
+    <button class="btn btn-primary" onclick="submitAsk()" id="ask-submit-btn">
+      <i class="ti ti-send"></i> Submit request
+    </button>
+  </div>
+  <div id="ask-result" style="display:none"></div>
+</div>
+
+<!-- OFFER HELP -->
+<div class="page" id="page-offer">
+  <div class="form-card">
+    <h2><i class="ti ti-heart-handshake" style="color:var(--green)"></i> Offer help</h2>
+    <div class="sub">Offer your time, tools, and/or treasure to help others. Please specify available times, list any skills/credentials, and if offering tools/materials/vehicles please specify make, model, condition and include photos/videos and any special instructions.</div>
+    <div class="field"><label>Your name *</label><input id="offer-name" placeholder="Full name" type="text"></div>
+    <div class="field-row">
+      <div class="field"><label>Phone *</label><input id="offer-phone" placeholder="(555) 000-0000" type="tel"></div>
+      <div class="field"><label>Email *</label><input id="offer-email" placeholder="you@email.com" type="email"></div>
+    </div>
+    <div class="field"><label>Your location / area you can serve</label><input id="offer-location" placeholder="City, state or ZIP — how far can you travel?"></div>
+    <div class="field"><label>What are you offering? (check all that apply)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="time" class="offer-type"> Time / labor</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="skills" class="offer-type"> Skilled work</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="tools" class="offer-type"> Tools / equipment</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="vehicle" class="offer-type"> Vehicle / transportation</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="donation" class="offer-type"> Money / supplies</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="housing" class="offer-type"> Temporary housing</label>
+      </div>
+    </div>
+    <div class="field"><label>Skills, certifications, or credentials</label><textarea id="offer-skills" placeholder="e.g. Licensed electrician (Ohio), First Aid/CPR certified, 10 years carpentry, fluent Spanish, CDL, etc." style="min-height:70px"></textarea></div>
+    <div class="field"><label>Available dates &amp; times</label><textarea id="offer-availability" placeholder="e.g. Weekends all day, weekday evenings after 5pm, available immediately for the next 2 weeks" style="min-height:60px"></textarea></div>
+    <div class="field"><label>Tools, materials, or vehicles you can bring</label><textarea id="offer-resources" placeholder="List make, model, and condition. e.g. 2018 F-250 pickup (good), 20' trailer, gas-powered chainsaw, generator (3500W), etc." style="min-height:70px"></textarea></div>
+    <div class="field"><label>Photos of tools/equipment</label>
+      <div class="file-upload-area" onclick="document.getElementById('offer-files').click()">
+        <i class="ti ti-camera" aria-hidden="true"></i>
+        Add photos or videos (optional)
+      </div>
+      <input id="offer-files" type="file" multiple accept="image/*,video/*" style="display:none" onchange="showFileNames('offer-files','offer-file-list')">
+      <div id="offer-file-list" style="margin-top:6px;font-size:12px;color:var(--text2)"></div>
+    </div>
+    <div class="field"><label>Any special instructions or limitations?</label><textarea id="offer-notes" placeholder="Physical limitations, preferred work types, anything we should know" style="min-height:60px"></textarea></div>
+    <button class="btn btn-primary" onclick="submitOffer()"><i class="ti ti-check"></i> Submit offer</button>
+  </div>
+  <div id="offer-result" style="display:none"></div>
+</div>
+
+<!-- FIND MISSIONS -->
+<div class="page" id="page-missions">
+  <div class="sh" style="margin-bottom:14px"><h3 style="font-size:18px">Find a mission</h3></div>
+  <div class="filter-bar">
+    <select id="filter-category" onchange="filterMissions()">
+      <option value="">All categories</option>
+      <option>Home repair</option><option>Debris removal</option><option>Food &amp; water</option>
+      <option>Medical assistance</option><option>Transportation</option><option>Temporary shelter</option>
+      <option>Utilities restoration</option><option>Other</option>
+    </select>
+    <select id="filter-urgency" onchange="filterMissions()">
+      <option value="">All urgency levels</option>
+      <option value="critical">Critical</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+    <select id="filter-status" onchange="filterMissions()">
+      <option value="">All statuses</option>
+      <option value="open">Open – volunteers needed</option>
+      <option value="active">Active – in progress</option>
+      <option value="complete">Completed</option>
+    </select>
+    <input type="text" id="filter-search" placeholder="Search..." onkeyup="filterMissions()" style="flex:1;min-width:140px">
+  </div>
+  <div class="mission-list" id="missions-list"></div>
+</div>
+
+<!-- COORDINATOR -->
+<div class="page" id="page-coordinator">
+  <div class="sh" style="margin-bottom:16px"><h3 style="font-size:18px">Coordinator dashboard</h3></div>
+  <div id="bottleneck-alerts"></div>
+  <div class="tab-bar">
+    <button class="active" onclick="coordTab('missions')">Missions &amp; tasks</button>
+    <button onclick="coordTab('reviews')">Pending reviews</button>
+    <button onclick="coordTab('asks')">Raw asks</button>
+    <button onclick="coordTab('volunteers')">Volunteers</button>
+  </div>
+  <div id="coord-missions-tab"></div>
+  <div id="coord-reviews-tab" style="display:none"></div>
+  <div id="coord-asks-tab" style="display:none"></div>
+  <div id="coord-volunteers-tab" style="display:none"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="sh" style="margin-bottom:16px"><h3 style="font-size:18px">Settings</h3></div>
+  <div class="settings-section">
+    <h3><i class="ti ti-bell" style="color:var(--orange)"></i> Alert notifications</h3>
+    <div class="field"><label>Alert email address</label><input id="settings-email" type="email" value="bjlinville1@gmail.com"></div>
+    <div class="field"><label>Default project manager name</label><input id="settings-pm-name" type="text" value="B.J. Linville"></div>
+    <div class="field"><label>Send alerts for</label>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-bottleneck" checked> Bottleneck / obstacle reported</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-review" checked> Task submitted for review</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-newask" checked> New help request submitted</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-missioncomplete" checked> Mission completed</label>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveSettings()"><i class="ti ti-check"></i> Save settings</button>
+    <div id="settings-saved" style="display:none;color:var(--green);font-size:13px;margin-top:8px"><i class="ti ti-circle-check"></i> Settings saved</div>
+  </div>
+  <div class="settings-section">
+    <h3><i class="ti ti-database" style="color:var(--navy)"></i> Data</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="exportData()"><i class="ti ti-download"></i> Export all data (JSON)</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadSampleData()"><i class="ti ti-sparkles"></i> Load sample data</button>
+    </div>
+  </div>
+</div>
+
+<!-- MISSION DETAIL -->
+<div class="page" id="page-mission-detail">
+  <button class="btn btn-secondary btn-sm" onclick="backToMissions()" style="margin-bottom:16px"><i class="ti ti-arrow-left"></i> Back</button>
+  <div id="mission-detail-content"></div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="review-modal" style="display:none" onclick="closeReviewModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="review-modal-title">Review task</h3>
+    <div id="review-modal-body"></div>
+    <div class="btn-group" style="margin-top:16px">
+      <button class="btn btn-success btn-sm" onclick="approveTask()"><i class="ti ti-circle-check"></i> Approve – acceptance criteria met</button>
+      <button class="btn btn-danger btn-sm" onclick="failTask()"><i class="ti ti-circle-x"></i> Fail – criteria not met</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeReviewModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="submit-modal" style="display:none" onclick="closeSubmitModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="submit-modal-title">Submit task update</h3>
+    <div id="submit-modal-body"></div>
+    <div class="btn-group" style="margin-top:16px">
+      <button class="btn btn-primary btn-sm" onclick="submitTaskUpdate()"><i class="ti ti-send"></i> Submit for review</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeSubmitModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="bottleneck-modal" style="display:none" onclick="closeBottleneckModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Report a bottleneck</h3>
+    <div id="bottleneck-modal-body"></div>
+    <div class="btn-group" style="margin-top:16px">
+      <button class="btn btn-primary btn-sm" onclick="submitBottleneck()"><i class="ti ti-alert-triangle"></i> Report bottleneck</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeBottleneckModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
