@@ -22,7 +22,7 @@ app.get('/config.js', (req, res) => {
   res.type('application/javascript');
   // Only expose keys that are safe for the frontend
   // In production, route Anthropic API calls through a backend endpoint instead
-  res.send(`window.ANTHROPIC_API_KEY = ${JSON.stringify(process.env.ANTHROPIC_API_KEY || '')};`);
+  res.send(`window.ANTHROPIC_API_KEY = ${JSON.stringify(process.env.volunteerdisasterrelief_anthropic_api_key || '')};`);
 });
 
 // Health check
@@ -35,7 +35,7 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n🌊 ReliefConnect running at http://localhost:${PORT}\n`);
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.volunteerdisasterrelief_anthropic_api_key) {
     console.warn('⚠️  ANTHROPIC_API_KEY not set — AI mission generation will use fallback mode.');
     console.warn('   Add it to your .env file to enable full AI features.\n');
   }
