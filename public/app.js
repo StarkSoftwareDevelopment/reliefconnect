@@ -236,7 +236,7 @@ Access notes: ${ask.access || 'none'}`;
   btn.innerHTML = `<i class="ti ti-send"></i> Submit request`;
   btn.disabled = false;
   updateStats();
-  sendEmailAlert('newask', `New request from ${ask.name} at ${ask.address}`);
+  sendEmailAlert('newask', `New request from ${ask.name} at ${ask.address}`, { missionTitle: mission.title, address: ask.address, reporter: ask.name });
 }
 
 // ===== SUBMIT OFFER =====
@@ -406,7 +406,7 @@ function submitTaskUpdate() {
   t.status = 'pending_review';
   DB.bottlenecks.push({ type: 'review', mId, pId, tId, mTitle: m.title, tTitle: t.title, volunteer, notes, created: Date.now(), open: true });
   save(); closeSubmitModal(); updateAlertCount();
-  sendEmailAlert('review', `Task "${t.title}" on mission "${m.title}" submitted for review by ${volunteer || 'a volunteer'}.`);
+  sendEmailAlert('review', `Task submitted for review by ${volunteer || 'a volunteer'}.`, { missionTitle: m.title, taskTitle: t.title, reporter: volunteer, address: m.address });
   viewMission(mId, missionDetailOrigin);
 }
 
@@ -440,17 +440,23 @@ function submitBottleneck() {
   t.bottlenecks.push(bn);
   DB.bottlenecks.push(bn);
   save(); closeBottleneckModal(); updateAlertCount();
-  sendEmailAlert('bottleneck', `BOTTLENECK on "${m.title}" — Task: "${t.title}" — ${desc}${reporter ? ` (reported by ${reporter})` : ''}`);
+  sendEmailAlert('bottleneck', desc, { missionTitle: m.title, taskTitle: t.title, reporter, address: m.address });
   alert(`Bottleneck reported! An alert has been sent to ${DB.settings.email}.`);
   viewMission(mId, missionDetailOrigin);
 }
 
-// ===== EMAIL ALERT (stub — wire to your backend) =====
-function sendEmailAlert(type, message) {
+// ===== EMAIL ALERT =====
+async function sendEmailAlert(type, message, extras = {}) {
   if (!DB.settings.alerts[type]) return;
-  // In production, POST to your backend email service here:
-  // fetch('/api/alert', { method: 'POST', body: JSON.stringify({ to: DB.settings.email, type, message }) });
-  console.log(`[ALERT → ${DB.settings.email}] ${message}`);
+  try {
+    await fetch('/api/alert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: DB.settings.email, type, message, ...extras })
+    });
+  } catch (e) {
+    console.warn('Alert not sent:', e);
+  }
 }
 
 // ===== COORDINATOR REVIEW =====
@@ -512,7 +518,7 @@ function checkMissionComplete(m) {
   const allDone = m.projects.every(p => p.tasks.every(t => t.status === 'complete'));
   if (allDone) {
     m.status = 'complete';
-    sendEmailAlert('missioncomplete', `Mission "${m.title}" is now COMPLETE!`);
+    sendEmailAlert('missioncomplete', `All tasks have been reviewed and approved.`, { missionTitle: m.title, address: m.address });
   }
 }
 
