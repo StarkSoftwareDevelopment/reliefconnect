@@ -164,11 +164,14 @@ async function submitAsk() {
 CORE PHILOSOPHY:
 - NEVER create "assessment", "planning", "survey", or "evaluation" tasks. The intake form IS the assessment. Go straight to physical work.
 - Tasks must be SPECIFIC and PHYSICAL — tell volunteers exactly what to do with their hands, to what standard, using what tools.
-- Bad task: "Remove debris from property." Good task: "Saw all logs/limbs >2\" diameter to 16\" lengths (12\"–20\" tolerance) and stack in a pile near the road."
-- Acceptance tests belong at the TASK level, not just the mission level. Each task should have 1-2 acceptance tests that a non-expert could evaluate with their eyes.
-- Acceptance tests use precise, measurable language: dimensions, quantities, thresholds. e.g. "It would be acceptable if all cut logs are ≤20\" long and stacked within 10 feet of the road."
-- Group tasks into logical PROJECTS based on work type or sequence (e.g. "Debris removal", "Structural repair", "Interior cleanup") — NOT "Phase 1/Phase 2" or "Planning/Execution".
-- Think like a crew foreman writing a work order, not a project manager writing a scope document.
+- Bad task: "Remove debris from property." Good task: "Saw all logs/limbs >2\" diameter to 16\" lengths (12\"–20\" tolerance) and stack in a single pile between 4 and 20 feet north of the road shoulder."
+- NEVER use vague spatial words: no "near", "close to", "around", "by the", "next to", "along", "toward", "away from". Always replace with a cardinal direction and a distance range in feet. e.g. "within 10 feet of" → "between 2 and 10 feet north of". If direction is unknown from the request, use "on the street-side edge of the property".
+- NEVER use vague quantity words: no "some", "most", "majority", "several", "a few", "as needed", "as necessary", "if applicable". Every quantity must be a number, range, or measurable threshold.
+- NEVER use vague condition words: no "clean", "secure", "stable", "adequate", "appropriate", "proper", "good condition". Replace with observable, testable criteria: "no movement when pushed with 50 lbs of force", "no gaps wider than 1/4\"", "no standing water visible".
+- Acceptance tests belong at the TASK level, not just the mission level. Each task must have 1-2 acceptance tests a non-expert could evaluate with a tape measure, their eyes, or their hands.
+- Acceptance tests are always objectively measurable: dimensions, counts, distances with cardinal directions, tolerances, forces. e.g. "It would be acceptable if all cut logs are ≤20\" long and stacked in a single pile between 2 and 10 feet north of the road shoulder, with no individual pieces outside that pile."
+- Group tasks into logical PROJECTS based on work type (e.g. "Debris removal", "Structural repair", "Interior cleanup") — NOT "Phase 1/Phase 2" or "Planning/Execution".
+- Think like a crew foreman writing a work order for someone who has never been to the site and will follow your instructions literally.
 
 Return ONLY a JSON object — no markdown, no preamble, no trailing text:
 {
