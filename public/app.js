@@ -256,6 +256,8 @@ function submitOffer() {
   };
   DB.volunteers.push(volunteer);
   save();
+  const offerLabel = document.getElementById('offer-submit-label');
+  if (offerLabel) offerLabel.textContent = 'Update offer';
   document.getElementById('offer-result').style.display = 'block';
   document.getElementById('offer-result').innerHTML = `<div class="form-card"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:50%;background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px"><i class="ti ti-circle-check"></i></div><div><div style="font-weight:600">Thank you, ${esc(name)}!</div><div style="font-size:13px;color:var(--text2)">Your offer has been recorded. A coordinator will reach out when there's a mission that matches your skills and availability.</div></div></div></div>`;
   updateStats();

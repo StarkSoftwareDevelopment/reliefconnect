@@ -329,7 +329,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
       <div id="offer-file-list" style="margin-top:6px;font-size:12px;color:var(--text2)"></div>
     </div>
     <div class="field"><label>Any special instructions or limitations?</label><textarea id="offer-notes" placeholder="Physical limitations, preferred work types, anything we should know" style="min-height:60px"></textarea></div>
-    <button class="btn btn-primary" onclick="submitOffer()"><i class="ti ti-check"></i> Submit offer</button>
+    <button class="btn btn-primary" id="offer-submit-btn" onclick="submitOffer()"><i class="ti ti-check"></i> <span id="offer-submit-label">Submit offer</span></button>
   </div>
   <div id="offer-result" style="display:none"></div>
 </div>
