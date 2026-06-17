@@ -159,17 +159,37 @@ async function submitAsk() {
     created: Date.now(), status: 'new'
   };
 
-  const aiPrompt = `You are a disaster relief mission coordinator. A person has submitted a request for help. Your job is to:
-1. Write 3-5 ACCEPTANCE TESTS that define what "done" looks like for this request (format: "It would be acceptable if...")
-2. Create a SCOPE OF WORK with 2-4 projects, each with 2-4 specific tasks, suggested tools, and estimated labor hours
-3. Return ONLY a JSON object — no markdown, no preamble, no trailing text. Schema:
+  const aiPrompt = `You are a disaster relief field operations coordinator turning help requests into executable volunteer missions. The person submitting this request has already done the assessment — your job is to turn it into action.
+
+CORE PHILOSOPHY:
+- NEVER create "assessment", "planning", "survey", or "evaluation" tasks. The intake form IS the assessment. Go straight to physical work.
+- Tasks must be SPECIFIC and PHYSICAL — tell volunteers exactly what to do with their hands, to what standard, using what tools.
+- Bad task: "Remove debris from property." Good task: "Saw all logs/limbs >2\" diameter to 16\" lengths (12\"–20\" tolerance) and stack in a pile near the road."
+- Acceptance tests belong at the TASK level, not just the mission level. Each task should have 1-2 acceptance tests that a non-expert could evaluate with their eyes.
+- Acceptance tests use precise, measurable language: dimensions, quantities, thresholds. e.g. "It would be acceptable if all cut logs are ≤20\" long and stacked within 10 feet of the road."
+- Group tasks into logical PROJECTS based on work type or sequence (e.g. "Debris removal", "Structural repair", "Interior cleanup") — NOT "Phase 1/Phase 2" or "Planning/Execution".
+- Think like a crew foreman writing a work order, not a project manager writing a scope document.
+
+Return ONLY a JSON object — no markdown, no preamble, no trailing text:
 {
-  "missionTitle": "concise 2-5 word action-oriented title describing what will be done (NOT the address, NOT 'Help needed' — e.g. 'Roof tarp installation', 'Downed tree cleanup', 'Flood damage repair', 'Food pantry restocking')",
-  "summary": "1-2 sentence summary",
-  "acceptanceTests": ["It would be acceptable if...", ...],
-  "projects": [{"title":"","tasks":[{"title":"","description":"","tools":"","estimatedHours":0}]}],
-  "pmBriefing": "1 paragraph briefing for the human project manager",
-  "agentBriefing": "structured briefing for an AI agent to sequence this work"
+  "missionTitle": "concise 2-5 word action title (e.g. 'Downed tree cleanup', 'Roof tarp installation', 'Flood damage repair') — never 'Help needed' or the address",
+  "summary": "1-2 sentence plain-language summary of what volunteers will actually do",
+  "acceptanceTests": ["It would be acceptable if... (mission-level only — broad completion criteria)", ...],
+  "projects": [
+    {
+      "title": "Short work-type label (e.g. 'Debris removal', 'Roof repair', 'Interior dryout')",
+      "tasks": [
+        {
+          "title": "Short imperative verb phrase (e.g. 'Saw logs to length', 'Bag brush and debris', 'Extract standing water')",
+          "description": "Specific physical instructions a volunteer can follow without asking questions. Include dimensions, tolerances, quantities, placement, and sequencing where relevant.",
+          "tools": "Specific tools needed (e.g. 'Chainsaw, measuring tape, work gloves, safety glasses, wedges')",
+          "acceptanceTests": ["It would be acceptable if... (task-level, measurable)", ...]
+        }
+      ]
+    }
+  ],
+  "pmBriefing": "1 paragraph for the human project manager covering sequencing, dependencies, safety concerns, and anything requiring coordinator judgment",
+  "agentBriefing": "Structured JSON-friendly briefing for an AI agent to assign volunteers and sequence work"
 }
 
 REQUEST:
@@ -202,7 +222,7 @@ Access notes: ${ask.access || 'none'}`;
       id: uid(), title: p.title, status: 'open',
       tasks: (p.tasks || []).map(t => ({
         id: uid(), title: t.title, description: t.description,
-        tools: t.tools, estimatedHours: t.estimatedHours || 0,
+        tools: t.tools, acceptanceTests: t.acceptanceTests || [],
         status: 'open', submissions: [], bottlenecks: []
       }))
     })),
@@ -342,6 +362,7 @@ function renderTask(m, p, t) {
     <div class="task-name">${esc(t.title)} ${statusBadge(t.status)}</div>
     <div class="task-sub">${esc(t.description)}</div>
     ${t.tools ? `<div class="task-sub" style="margin-top:2px"><i class="ti ti-tool" style="font-size:11px;vertical-align:middle"></i> ${esc(t.tools)}</div>` : ''}
+    ${t.acceptanceTests && t.acceptanceTests.length ? `<div style="margin-top:6px">${t.acceptanceTests.map(at => `<div style="font-size:11px;color:var(--teal);margin-top:3px;display:flex;gap:5px;align-items:flex-start"><span style="flex-shrink:0">✓</span><span>${esc(at)}</span></div>`).join('')}</div>` : ''}
 
     ${failNote}${bnNote}
     <div style="margin-top:6px">${actions}</div>
@@ -474,7 +495,8 @@ function openReviewModal(mId, pId, tId) {
   const lastSub = t.submissions && t.submissions[t.submissions.length - 1];
   document.getElementById('review-modal-title').textContent = `Review: ${t.title}`;
   document.getElementById('review-modal-body').innerHTML = `
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Acceptance tests for this mission:</div>
+    ${t.acceptanceTests && t.acceptanceTests.length ? `<div style="font-size:13px;font-weight:600;margin-bottom:6px">Acceptance tests for this task:</div><ul class="acceptance-list">${t.acceptanceTests.map((a, i) => `<li>[${i+1}] ${esc(a)}</li>`).join('')}</ul>` : ''}
+    <div style="font-size:13px;font-weight:600;margin-top:10px;margin-bottom:6px">Mission-level acceptance tests:</div>
     <ul class="acceptance-list">${m.acceptanceTests.map((a, i) => `<li>[${i + 1}] ${esc(a)}</li>`).join('')}</ul>
     ${lastSub ? `<div class="review-block" style="margin-top:12px"><div class="rv-label">Volunteer submission</div><p>${esc(lastSub.notes)}</p>${lastSub.files ? `<div style="margin-top:4px;font-size:12px;color:var(--text2)">${lastSub.files} file(s) attached</div>` : ''}<div style="font-size:11px;color:var(--text2);margin-top:4px">${fmtdt(lastSub.created)}${lastSub.volunteer ? ' · ' + esc(lastSub.volunteer) : ''}</div></div>` : ''}
     <div class="field" style="margin-top:14px"><label>Review notes *</label><textarea id="review-notes" placeholder="Describe your review decision. If failing, cite the specific acceptance test number. e.g. 'Failed. Acceptance test [2]: All construction must meet county building codes. Spindles are 8&quot; apart — must be no more than 4&quot;. Correct and resubmit.'" style="min-height:90px"></textarea></div>`;
