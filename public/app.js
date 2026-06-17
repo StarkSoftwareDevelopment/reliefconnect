@@ -233,7 +233,7 @@ Access notes: ${ask.access || 'none'}`;
     </div>
   </div>`;
 
-  btn.innerHTML = `<i class="ti ti-send"></i> Submit request`;
+  btn.innerHTML = `<i class="ti ti-send"></i> Update request`;
   btn.disabled = false;
   updateStats();
   sendEmailAlert('newask', `New request from ${ask.name} at ${ask.address}`, { missionTitle: mission.title, address: ask.address, reporter: ask.name });
@@ -328,7 +328,7 @@ function renderTask(m, p, t) {
   let actions = '';
   if (t.status === 'open' || t.status === 'failed') {
     const hasSubmissions = (t.submissions || []).length > 0;
-  actions = `<span class="task-action" onclick="openSubmitModal('${m.id}','${p.id}','${t.id}')">${'${hasSubmissions ? "Update" : "Submit update"}'}</span> · <span class="task-action" style="color:var(--red)" onclick="openBottleneckModal('${m.id}','${p.id}','${t.id}')">Report bottleneck</span>`;
+  actions = `<span class="task-action" onclick="openSubmitModal('${m.id}','${p.id}','${t.id}')">${hasSubmissions ? 'Update' : 'Submit update'}</span> · <span class="task-action" style="color:var(--red)" onclick="openBottleneckModal('${m.id}','${p.id}','${t.id}')">Report bottleneck</span>`;
   } else if (t.status === 'pending_review') {
     actions = `<span style="font-size:12px;color:var(--amber)">Awaiting coordinator review</span>`;
   } else if (t.status === 'complete') {
