@@ -325,7 +325,8 @@ function renderTask(m, p, t) {
   const bns = (t.bottlenecks || []).filter(b => b.open);
   let actions = '';
   if (t.status === 'open' || t.status === 'failed') {
-    actions = `<span class="task-action" onclick="openSubmitModal('${m.id}','${p.id}','${t.id}')">Submit update</span> · <span class="task-action" style="color:var(--red)" onclick="openBottleneckModal('${m.id}','${p.id}','${t.id}')">Report bottleneck</span>`;
+    const hasSubmissions = (t.submissions || []).length > 0;
+  actions = `<span class="task-action" onclick="openSubmitModal('${m.id}','${p.id}','${t.id}')">${'${hasSubmissions ? "Update" : "Submit update"}'}</span> · <span class="task-action" style="color:var(--red)" onclick="openBottleneckModal('${m.id}','${p.id}','${t.id}')">Report bottleneck</span>`;
   } else if (t.status === 'pending_review') {
     actions = `<span style="font-size:12px;color:var(--amber)">Awaiting coordinator review</span>`;
   } else if (t.status === 'complete') {
@@ -339,7 +340,7 @@ function renderTask(m, p, t) {
     <div class="task-name">${esc(t.title)} ${statusBadge(t.status)}</div>
     <div class="task-sub">${esc(t.description)}</div>
     ${t.tools ? `<div class="task-sub" style="margin-top:2px"><i class="ti ti-tool" style="font-size:11px;vertical-align:middle"></i> ${esc(t.tools)}</div>` : ''}
-    ${t.estimatedHours ? `<div class="task-sub"><i class="ti ti-clock" style="font-size:11px;vertical-align:middle"></i> Est. ${t.estimatedHours}h</div>` : ''}
+
     ${failNote}${bnNote}
     <div style="margin-top:6px">${actions}</div>
   </div>
@@ -385,6 +386,9 @@ function openSubmitModal(mId, pId, tId) {
       <div id="sub-file-list" style="margin-top:4px;font-size:12px;color:var(--text2)"></div>
     </div>
     <div class="field"><label>Your name</label><input id="sub-volunteer" placeholder="Your name" type="text"></div>`;
+  const hasExisting = (t.submissions || []).length > 0;
+  const labelEl = document.getElementById('submit-task-label');
+  if (labelEl) labelEl.textContent = hasExisting ? 'Update' : 'Submit for review';
   document.getElementById('submit-modal').style.display = 'flex';
 }
 

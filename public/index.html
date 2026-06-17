@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ReliefConnect – Volunteer Disaster Relief Coordination</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231A2744'/><text y='72' x='50' text-anchor='middle' font-size='60' font-family='Arial Black,sans-serif' font-weight='900' fill='%23F97316'>!!</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -217,7 +218,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   </div>
   <div class="hero-grid">
     <div class="hero-card hc-ask" onclick="showPage('ask')">
-      <div class="hc-icon"><i class="ti ti-sos" aria-hidden="true"></i></div>
+      <div class="hc-icon" style="font-size:22px;font-weight:800;letter-spacing:-1px">!!</div>
       <h2>Ask for help</h2>
       <p>Tell us what you need. Please be as detailed as possible and include photos and videos if you can.</p>
       <i class="ti ti-arrow-right hc-arrow" aria-hidden="true"></i>
@@ -248,7 +249,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 <!-- ASK FOR HELP -->
 <div class="page" id="page-ask">
   <div class="form-card">
-    <h2><i class="ti ti-sos" style="color:var(--red)"></i> Ask for help</h2>
+    <h2><span style="color:var(--red);font-weight:800;font-size:18px">!!</span> Ask for help</h2>
     <div class="sub">Tell us what you need. Please be as detailed as possible and include photos and videos if you can. The more detail you provide, the faster we can organize a mission to help.</div>
     <div class="field"><label>Your name *</label><input id="ask-name" placeholder="Full name" type="text"></div>
     <div class="field-row">
@@ -424,7 +425,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
     <h3 id="submit-modal-title">Submit task update</h3>
     <div id="submit-modal-body"></div>
     <div class="btn-group" style="margin-top:16px">
-      <button class="btn btn-primary btn-sm" onclick="submitTaskUpdate()"><i class="ti ti-send"></i> Submit for review</button>
+      <button class="btn btn-primary btn-sm" id="submit-task-btn" onclick="submitTaskUpdate()"><i class="ti ti-send"></i> <span id="submit-task-label">Submit for review</span></button>
       <button class="btn btn-secondary btn-sm" onclick="closeSubmitModal()">Cancel</button>
     </div>
   </div>
