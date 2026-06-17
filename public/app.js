@@ -794,3 +794,124 @@ function renderAll() {
 
 // ===== INIT =====
 load();
+
+// ===== GOOGLE MAPS =====
+let map = null;
+let mapMarkers = [];
+
+function initMap() {
+  // Default center: US center — will shift to fit markers once missions load
+  map = new google.maps.Map(document.getElementById('missions-map'), {
+    zoom: 5,
+    center: { lat: 39.5, lng: -98.35 },
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    styles: [
+      { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+      { featureType: 'transit', stylers: [{ visibility: 'off' }] }
+    ]
+  });
+  renderMapPins();
+}
+
+async function geocodeAddress(address) {
+  const encoded = encodeURIComponent(address);
+  const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encoded}&key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI`);
+  const data = await res.json();
+  if (data.results && data.results[0]) {
+    return data.results[0].geometry.location;
+  }
+  return null;
+}
+
+async function renderMapPins() {
+  if (!map) return;
+
+  // Clear existing markers
+  mapMarkers.forEach(m => m.setMap(null));
+  mapMarkers = [];
+
+  const urgencyColors = {
+    critical: '#C0392B',
+    high: '#E8521A',
+    medium: '#B87F1A',
+    low: '#1A7A4A'
+  };
+
+  const bounds = new google.maps.LatLngBounds();
+  let hasMarkers = false;
+
+  for (const mission of DB.missions) {
+    if (!mission.address) continue;
+
+    // Use cached coords if we have them, otherwise geocode
+    if (!mission._coords) {
+      try {
+        mission._coords = await geocodeAddress(mission.address);
+      } catch(e) {
+        continue;
+      }
+      if (!mission._coords) continue;
+      save(); // cache the coords
+    }
+
+    const pos = mission._coords;
+    const color = urgencyColors[mission.urgency] || '#1A2744';
+
+    const total = mission.projects.reduce((s,p) => s + p.tasks.length, 0);
+    const done = mission.projects.reduce((s,p) => s + p.tasks.filter(t => t.status === 'complete').length, 0);
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    const marker = new google.maps.Marker({
+      position: pos,
+      map,
+      title: mission.title,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+        scale: 10
+      }
+    });
+
+    const infoWindow = new google.maps.InfoWindow({
+      content: `
+        <div style="font-family:Inter,sans-serif;padding:4px;max-width:220px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(mission.title)}</div>
+          <div style="font-size:12px;color:#6B7280;margin-bottom:6px">${esc(mission.address)}</div>
+          <div style="font-size:12px;margin-bottom:6px">${pct}% complete · ${esc(mission.status)}</div>
+          <a href="#" onclick="event.preventDefault();viewMission('${mission.id}','missions')" 
+             style="font-size:12px;color:#E8521A;font-weight:500;text-decoration:none">View mission →</a>
+        </div>`
+    });
+
+    marker.addListener('click', () => {
+      mapMarkers.forEach(m => m._iw && m._iw.close());
+      infoWindow.open(map, marker);
+    });
+
+    marker._iw = infoWindow;
+    mapMarkers.push(marker);
+    bounds.extend(pos);
+    hasMarkers = true;
+  }
+
+  if (hasMarkers) {
+    map.fitBounds(bounds);
+    // Don't zoom in too close for a single pin
+    const listener = google.maps.event.addListener(map, 'idle', () => {
+      if (map.getZoom() > 14) map.setZoom(14);
+      google.maps.event.removeListener(listener);
+    });
+  }
+}
+
+// Re-render pins when missions page is shown
+const _origShowPage = showPage;
+function showPage(p) {
+  _origShowPage(p);
+  if (p === 'missions' && map) renderMapPins();
+}

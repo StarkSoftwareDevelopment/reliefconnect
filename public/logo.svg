@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 115">
+  <!-- Parachute dome: large filled semicircle -->
+  <path d="M8,48 A42,42 0 0,1 92,48 Z" fill="#000"/>
+
+  <!-- Left outer cord: from dome left, diagonal down-right to box top-left -->
+  <line x1="12" y1="46" x2="28" y2="72" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Center cord: straight vertical from dome center to box top -->
+  <line x1="50" y1="48" x2="50" y2="72" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Right outer cord: from dome right, diagonal down-left to box top-right -->
+  <line x1="88" y1="46" x2="72" y2="72" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Box: rounded rect, outline only -->
+  <rect x="22" y="72" width="56" height="38" rx="6" fill="white" stroke="#000" stroke-width="4"/>
+
+  <!-- Plus sign: black, centered in box -->
+  <line x1="50" y1="80" x2="50" y2="102" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+  <line x1="32" y1="91" x2="68" y2="91" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+</svg>
