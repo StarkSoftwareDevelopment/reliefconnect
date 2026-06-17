@@ -112,7 +112,7 @@ async function callAI(prompt) {
 
 function buildFallbackMission(ask) {
   return {
-    missionTitle: `Help needed: ${ask.category || 'General assistance'} at ${ask.address}`,
+    missionTitle: `${ask.category || 'General'} assistance`,
     summary: ask.desc.slice(0, 140) + (ask.desc.length > 140 ? '...' : ''),
     acceptanceTests: [
       'It would be acceptable if the primary issue described is fully resolved and the location is safe for occupants.',
@@ -164,7 +164,7 @@ async function submitAsk() {
 2. Create a SCOPE OF WORK with 2-4 projects, each with 2-4 specific tasks, suggested tools, and estimated labor hours
 3. Return ONLY a JSON object — no markdown, no preamble, no trailing text. Schema:
 {
-  "missionTitle": "short descriptive title for this mission",
+  "missionTitle": "concise 2-5 word action-oriented title describing what will be done (NOT the address, NOT 'Help needed' — e.g. 'Roof tarp installation', 'Downed tree cleanup', 'Flood damage repair', 'Food pantry restocking')",
   "summary": "1-2 sentence summary",
   "acceptanceTests": ["It would be acceptable if...", ...],
   "projects": [{"title":"","tasks":[{"title":"","description":"","tools":"","estimatedHours":0}]}],
