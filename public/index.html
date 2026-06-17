@@ -381,11 +381,11 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
     <div class="field"><label>Alert email address</label><input id="settings-email" type="email" value="bjlinville1@gmail.com"></div>
     <div class="field"><label>Default project manager name</label><input id="settings-pm-name" type="text" value="B.J. Linville"></div>
     <div class="field"><label>Send alerts for</label>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-bottleneck" checked> Bottleneck / obstacle reported</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-review" checked> Task submitted for review</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-newask" checked> New help request submitted</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" id="alert-missioncomplete" checked> Mission completed</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="checkbox" id="alert-bottleneck" checked style="width:16px;height:16px;flex-shrink:0;cursor:pointer"><span style="cursor:pointer" onclick="document.getElementById('alert-bottleneck').click()">Bottleneck / obstacle reported</span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="checkbox" id="alert-review" checked style="width:16px;height:16px;flex-shrink:0;cursor:pointer"><span style="cursor:pointer" onclick="document.getElementById('alert-review').click()">Task submitted for review</span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="checkbox" id="alert-newask" checked style="width:16px;height:16px;flex-shrink:0;cursor:pointer"><span style="cursor:pointer" onclick="document.getElementById('alert-newask').click()">New help request submitted</span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="checkbox" id="alert-missioncomplete" checked style="width:16px;height:16px;flex-shrink:0;cursor:pointer"><span style="cursor:pointer" onclick="document.getElementById('alert-missioncomplete').click()">Mission completed</span></div>
       </div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="saveSettings()"><i class="ti ti-check"></i> Save settings</button>
