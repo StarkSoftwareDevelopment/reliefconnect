@@ -60,7 +60,7 @@ function showPage(p) {
   const nb = document.getElementById('nav-' + p);
   if (nb) nb.classList.add('active');
   if (p === 'coordinator') renderCoordinator();
-  if (p === 'missions') renderMissionsList();
+  if (p === 'missions') { renderMissionsList(); if (map) renderMapPins(); }
   if (p === 'home') renderHome();
 }
 
@@ -911,9 +911,4 @@ async function renderMapPins() {
   }
 }
 
-// Re-render pins when missions page is shown
-const _origShowPage = showPage;
-function showPage(p) {
-  _origShowPage(p);
-  if (p === 'missions' && map) renderMapPins();
-}
+
