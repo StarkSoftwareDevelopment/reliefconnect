@@ -61,7 +61,7 @@ function showPage(p) {
   if (nb) nb.classList.add('active');
   if (p === 'coordinator') renderCoordinator();
   if (p === 'missions') { renderMissionsList(); if (map) renderMapPins(); }
-  if (p === 'home') renderHome();
+  if (p === 'home') { renderHome(); if (homeMap) renderMapPins(); }
 }
 
 function backToMissions() { showPage(missionDetailOrigin === 'coordinator' ? 'coordinator' : 'missions'); }
@@ -826,19 +826,24 @@ load();
 let map = null;
 let mapMarkers = [];
 
+let homeMap = null;
+let homeMapMarkers = [];
+
+const MAP_OPTIONS = {
+  zoom: 5,
+  center: { lat: 39.5, lng: -98.35 },
+  mapTypeControl: false,
+  streetViewControl: false,
+  fullscreenControl: false,
+  styles: [
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] }
+  ]
+};
+
 function initMap() {
-  // Default center: US center — will shift to fit markers once missions load
-  map = new google.maps.Map(document.getElementById('missions-map'), {
-    zoom: 5,
-    center: { lat: 39.5, lng: -98.35 },
-    mapTypeControl: false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    styles: [
-      { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-      { featureType: 'transit', stylers: [{ visibility: 'off' }] }
-    ]
-  });
+  map = new google.maps.Map(document.getElementById('missions-map'), MAP_OPTIONS);
+  homeMap = new google.maps.Map(document.getElementById('home-map'), MAP_OPTIONS);
   renderMapPins();
 }
 
@@ -853,11 +858,13 @@ async function geocodeAddress(address) {
 }
 
 async function renderMapPins() {
-  if (!map) return;
+  if (!map && !homeMap) return;
 
   // Clear existing markers
   mapMarkers.forEach(m => m.setMap(null));
   mapMarkers = [];
+  homeMapMarkers.forEach(m => m.setMap(null));
+  homeMapMarkers = [];
 
   const urgencyColors = {
     critical: '#C0392B',
@@ -890,9 +897,8 @@ async function renderMapPins() {
     const done = mission.projects.reduce((s,p) => s + p.tasks.filter(t => t.status === 'complete').length, 0);
     const pct = total ? Math.round(done/total*100) : 0;
 
-    const marker = new google.maps.Marker({
+    const markerOptions = {
       position: pos,
-      map,
       title: mission.title,
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
@@ -902,36 +908,52 @@ async function renderMapPins() {
         strokeWeight: 2,
         scale: 10
       }
-    });
+    };
 
-    const infoWindow = new google.maps.InfoWindow({
-      content: `
-        <div style="font-family:Inter,sans-serif;padding:4px;max-width:220px">
-          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(mission.title)}</div>
-          <div style="font-size:12px;color:#6B7280;margin-bottom:6px">${esc(mission.address)}</div>
-          <div style="font-size:12px;margin-bottom:6px">${pct}% complete · ${esc(mission.status)}</div>
-          <a href="#" onclick="event.preventDefault();viewMission('${mission.id}','missions')" 
-             style="font-size:12px;color:#E8521A;font-weight:500;text-decoration:none">View mission →</a>
-        </div>`
-    });
+    const infoContent = `
+      <div style="font-family:Inter,sans-serif;padding:4px;max-width:220px">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(mission.title)}</div>
+        <div style="font-size:12px;color:#6B7280;margin-bottom:6px">${esc(mission.address)}</div>
+        <div style="font-size:12px;margin-bottom:6px">${pct}% complete · ${esc(mission.status)}</div>
+        <a href="#" onclick="event.preventDefault();viewMission('${mission.id}','missions')" 
+           style="font-size:12px;color:#E8521A;font-weight:500;text-decoration:none">View mission →</a>
+      </div>`;
 
-    marker.addListener('click', () => {
-      mapMarkers.forEach(m => m._iw && m._iw.close());
-      infoWindow.open(map, marker);
-    });
+    // Add to missions map
+    if (map) {
+      const marker = new google.maps.Marker({ ...markerOptions, map });
+      const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+      marker.addListener('click', () => {
+        mapMarkers.forEach(m => m._iw && m._iw.close());
+        infoWindow.open(map, marker);
+      });
+      marker._iw = infoWindow;
+      mapMarkers.push(marker);
+    }
 
-    marker._iw = infoWindow;
-    mapMarkers.push(marker);
+    // Add to home map
+    if (homeMap) {
+      const hMarker = new google.maps.Marker({ ...markerOptions, map: homeMap });
+      const hInfoWindow = new google.maps.InfoWindow({ content: infoContent });
+      hMarker.addListener('click', () => {
+        homeMapMarkers.forEach(m => m._iw && m._iw.close());
+        hInfoWindow.open(homeMap, hMarker);
+      });
+      hMarker._iw = hInfoWindow;
+      homeMapMarkers.push(hMarker);
+    }
+
     bounds.extend(pos);
     hasMarkers = true;
   }
 
   if (hasMarkers) {
-    map.fitBounds(bounds);
-    // Don't zoom in too close for a single pin
-    const listener = google.maps.event.addListener(map, 'idle', () => {
-      if (map.getZoom() > 14) map.setZoom(14);
-      google.maps.event.removeListener(listener);
+    [map, homeMap].filter(Boolean).forEach(m => {
+      m.fitBounds(bounds);
+      const listener = google.maps.event.addListener(m, 'idle', () => {
+        if (m.getZoom() > 14) m.setZoom(14);
+        google.maps.event.removeListener(listener);
+      });
     });
   }
 }
