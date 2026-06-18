@@ -368,14 +368,14 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   <div class="sh" style="margin-bottom:16px"><h3 style="font-size:18px">Coordinator dashboard</h3></div>
   <div id="bottleneck-alerts"></div>
   <div class="tab-bar">
-    <button class="active" onclick="coordTab('missions')">Missions &amp; tasks</button>
+    <button class="active" onclick="coordTab('approval')">⏳ Approval queue</button>
+    <button onclick="coordTab('missions')">Missions</button>
     <button onclick="coordTab('reviews')">Pending reviews</button>
-    <button onclick="coordTab('asks')">Raw asks</button>
     <button onclick="coordTab('volunteers')">Volunteers</button>
   </div>
-  <div id="coord-missions-tab"></div>
+  <div id="coord-approval-tab"></div>
+  <div id="coord-missions-tab" style="display:none"></div>
   <div id="coord-reviews-tab" style="display:none"></div>
-  <div id="coord-asks-tab" style="display:none"></div>
   <div id="coord-volunteers-tab" style="display:none"></div>
 </div>
 
@@ -447,6 +447,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   </div>
 </div>
 
+<script src="/config.js"></script>
 <script src="app.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI&callback=initMap" async defer></script>
 </body>
