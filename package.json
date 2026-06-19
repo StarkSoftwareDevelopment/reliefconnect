@@ -34,6 +34,7 @@
     "testMatch": [
       "**/tests/**/*.test.js"
     ],
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "globalTeardown": "./tests/jest.teardown.js"
   }
 }

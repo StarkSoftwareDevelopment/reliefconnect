@@ -11,8 +11,8 @@
  */
 
 const {
-  api, sb, makeAsk,
-  trackAsk, trackProject,
+  api, sb, makeAsk, testEmail,
+  trackAsk, trackProject, trackPerson,
   cleanupTestData, getProject, getProjectTasks
 } = require('./helpers');
 
@@ -43,6 +43,7 @@ describe('4. Task & project state machine', () => {
 
   // ── 4a. Task submission by volunteer ──────────────────────────────────────
   describe('4a. Volunteer submits a task update', () => {
+    const janeEmail = testEmail('jane');
     let projectId;
     let task;
     let submitResult;
@@ -53,7 +54,7 @@ describe('4. Task & project state machine', () => {
       const { ok, data } = await api(`/api/tasks/${task.id}/submit`, {
         notes: 'Removed all broken rails and pickets from the 40-foot section. All debris collected into a single pile 6 feet east of the driveway. Replacement lumber measured and cut to length. Ready for installation.',
         personName: 'Jane Volunteer',
-        personEmail: 'jane@test.reliefconnect.com'
+        personEmail: janeEmail
       });
       expect(ok).toBe(true, `submit failed: ${JSON.stringify(data)}`);
       submitResult = data;
@@ -79,7 +80,7 @@ describe('4. Task & project state machine', () => {
     });
 
     test('volunteer person record created', async () => {
-      const people = await sb(`people`, `email=eq.jane@test.reliefconnect.com`);
+      const people = await sb(`people`, `email=eq.${janeEmail}`);
       expect(people.length).toBeGreaterThanOrEqual(1);
       expect(people[0].name).toBe('Jane Volunteer');
     });
@@ -92,6 +93,7 @@ describe('4. Task & project state machine', () => {
 
   // ── 4b. Coordinator approves a task ───────────────────────────────────────
   describe('4b. Coordinator approves task — pass', () => {
+    const bobEmail = testEmail('bob');
     let projectId;
     let task;
     let reviewResult;
@@ -103,7 +105,7 @@ describe('4. Task & project state machine', () => {
       await api(`/api/tasks/${task.id}/submit`, {
         notes: 'All fence pickets replaced. Posts checked for plumb — all within 1/4 inch of vertical. Rails secured with 3-inch screws at 16-inch intervals.',
         personName: 'Bob Builder',
-        personEmail: 'bob@test.reliefconnect.com'
+        personEmail: bobEmail
       });
 
       const { ok, data } = await api(`/api/tasks/${task.id}/review`, {
@@ -257,6 +259,7 @@ describe('4. Task & project state machine', () => {
 
   // ── 4e. Bottleneck reporting ──────────────────────────────────────────────
   describe('4e. Bottleneck reporting', () => {
+    const sallyEmail = testEmail('sally');
     let projectId;
     let task;
     let bottleneckResult;
@@ -267,7 +270,7 @@ describe('4. Task & project state machine', () => {
       const { ok, data } = await api(`/api/tasks/${task.id}/bottleneck`, {
         description: 'Missing materials — need 40 linear feet of 1x6 cedar pickets and 16 8-foot 4x4 posts before work can continue. Lumber yard is 12 miles south on Route 9.',
         reporterName: 'Stuck Sally',
-        reporterEmail: 'sally@test.reliefconnect.com'
+        reporterEmail: sallyEmail
       });
       expect(ok).toBe(true);
       bottleneckResult = data;
@@ -329,7 +332,7 @@ describe('4. Task & project state machine', () => {
     test('submitting with unrecognized name creates a new person', async () => {
       const { projectId, tasks: [task] } = await approvedProject();
       const uniqueName = `Unique Person ${Date.now()}`;
-      const uniqueEmail = `unique${Date.now()}@test.reliefconnect.com`;
+      const uniqueEmail = testEmail('unique');
 
       await api(`/api/tasks/${task.id}/submit`, {
         notes: 'Completed the task.',
@@ -344,7 +347,7 @@ describe('4. Task & project state machine', () => {
 
     test('submitting twice with same email does not create duplicate person', async () => {
       const { projectId, tasks } = await approvedProject();
-      const sharedEmail = `nodupe${Date.now()}@test.reliefconnect.com`;
+      const sharedEmail = testEmail('nodupe');
 
       for (const task of tasks.slice(0, 2)) {
         await api(`/api/tasks/${task.id}/submit`, {

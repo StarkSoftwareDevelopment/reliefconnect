@@ -35,6 +35,10 @@ global.document = {
   querySelector: () => null
 };
 global.fetch = async () => ({ ok: false, json: async () => ({}), text: async () => '' });
+
+// NOTE: Suite 6 is pure unit tests — no network calls, no database writes.
+// The email strings used below (jane@example.com etc.) are test inputs to
+// validation functions only. No records are created. No cleanup needed.
 global.google = null; // Maps not loaded in test env
 
 // We'll test the pure utility functions by defining them directly here

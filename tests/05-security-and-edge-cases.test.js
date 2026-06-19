@@ -13,7 +13,7 @@
  * - RLS: anon key cannot write to projects/tasks directly
  */
 
-const { api, sb, makeAsk, trackAsk, trackProject, cleanupTestData } = require('./helpers');
+const { api, sb, makeAsk, testEmail, trackAsk, trackProject, trackPerson, cleanupTestData } = require('./helpers');
 const fetch = require('node-fetch');
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
@@ -181,23 +181,24 @@ describe('5. API security & edge cases', () => {
       const unique = `Test Person ${Date.now()}`;
       const { status, data } = await api('/api/people', {
         name: unique,
-        email: `test${Date.now()}@reliefconnect-test.com`
+        email: testEmail('person')
       });
       expect([200, 201]).toContain(status);
       expect(data.name).toBe(unique);
       expect(data.id).toBeTruthy();
       expect(data.slug).toBeTruthy();
+      if (data.id) trackPerson(data.id);
     });
 
     test('POST /api/people with duplicate email returns existing person, not duplicate', async () => {
-      const email = `nodupe${Date.now()}@reliefconnect-test.com`;
+      const email = testEmail('nodupe');
       const first = await api('/api/people', { name: 'First Name', email });
       const second = await api('/api/people', { name: 'Different Name Same Email', email });
       expect(first.data.id).toBe(second.data.id);
     });
 
     test('POST /api/people with no name returns 400', async () => {
-      const { status, data } = await api('/api/people', { email: 'test@test.com' });
+      const { status, data } = await api('/api/people', { email: testEmail('no-name') });
       expect(status).toBe(400);
       expect(data.error).toBeTruthy();
     });
@@ -205,7 +206,7 @@ describe('5. API security & edge cases', () => {
     test('people slugs are URL-safe (no spaces or special chars)', async () => {
       const { data } = await api('/api/people', {
         name: 'Ó\'Reilly & Associates — LLC',
-        email: `slug-test-${Date.now()}@test.com`
+        email: testEmail('slug-test')
       });
       expect(data.slug).toMatch(/^[a-z0-9_]+$/);
     });
@@ -213,7 +214,7 @@ describe('5. API security & edge cases', () => {
     test('GET /api/people/:slug returns that person', async () => {
       const created = await api('/api/people', {
         name: 'Slug Test Person',
-        email: `slugtest${Date.now()}@test.com`
+        email: testEmail('slugtest')
       });
       const res = await fetch(`${BASE_URL}/api/people/${created.data.slug}`);
       expect(res.ok).toBe(true);
@@ -287,7 +288,7 @@ describe('5. API security & edge cases', () => {
   // ── 5e. Concurrent requests ───────────────────────────────────────────────
   describe('5e. Concurrent requests', () => {
     test('two concurrent submissions with same email create only one person', async () => {
-      const email = `concurrent${Date.now()}@test.reliefconnect.com`;
+      const email = testEmail('concurrent');
       const [r1, r2] = await Promise.all([
         api('/api/people', { name: 'Person A', email }),
         api('/api/people', { name: 'Person B', email })
