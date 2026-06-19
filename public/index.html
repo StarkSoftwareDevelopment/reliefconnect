@@ -181,14 +181,25 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 .settings-section h3{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
 
 /* MAP */
-.map-container{width:100%;height:380px;border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);margin-bottom:16px;background:#e8e8e8}
-#missions-map{width:100%;height:100%}
+.map-container{width:100%;height:380px;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:16px;background:#e8e8e8;position:relative}
+#missions-map,#home-map{width:100%;height:380px;border-radius:var(--radius)}
 /* FILTER BAR */
 .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .filter-bar select,.filter-bar input{border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;background:#fff;color:var(--text);outline:none}
 .filter-bar select:focus,.filter-bar input:focus{border-color:#60A5FA}
 
 .tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;background:#F3F4F6;color:#374151;margin:2px}
+
+/* FORM VALIDATION */
+.field-invalid{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(192,57,43,.12) !important}
+.field-error{display:flex;align-items:flex-start;gap:5px;color:var(--red);font-size:12px;margin-top:5px;line-height:1.4}
+.field-error i{font-size:13px;flex-shrink:0;margin-top:1px}
+.field-hint{font-size:12px;color:var(--text2);margin-top:4px}
+.required-star{color:var(--red);margin-left:1px}
+/* Character counter */
+.char-counter{font-size:11px;color:var(--text2);text-align:right;margin-top:3px}
+.char-counter.warn{color:var(--amber)}
+.char-counter.good{color:var(--green)}
 
 /* RESPONSIVE */
 @media(max-width:700px){
@@ -252,16 +263,17 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 
 <!-- ASK FOR HELP -->
 <div class="page" id="page-ask">
-  <div class="form-card">
+  <div class="form-card" id="ask-form">
     <h2><span style="color:var(--red);font-weight:800;font-size:18px">!!</span> Ask for help</h2>
     <div class="sub">Tell us what you need. Please be as detailed as possible and include photos and videos if you can. The more detail you provide, the faster we can organize a mission to help.</div>
-    <div class="field"><label>Your name *</label><input id="ask-name" placeholder="Full name" type="text"></div>
+    <div class="field"><label>Your name <span class="required-star">*</span></label><input id="ask-name" placeholder="Full name" type="text"></div>
     <div class="field-row">
       <div class="field"><label>Phone</label><input id="ask-phone" placeholder="(555) 000-0000" type="tel"></div>
       <div class="field"><label>Email</label><input id="ask-email" placeholder="you@email.com" type="email"></div>
     </div>
-    <div class="field"><label>Address / Location *</label><input id="ask-address" placeholder="Street address, city, state, ZIP"></div>
-    <div class="field"><label>What do you need help with? *</label><textarea id="ask-desc" placeholder="Describe your situation in as much detail as possible. What happened? What is damaged? What do you need most urgently? Are there any hazards or access restrictions?"></textarea></div>
+    <div class="field"><label>Address / Location <span class="required-star">*</span></label><input id="ask-address" placeholder="Street address, city, state, ZIP"></div>
+    <div class="field"><label>What do you need help with? <span class="required-star">*</span></label><textarea id="ask-desc" placeholder="Describe your situation in as much detail as possible. What happened? What is damaged? What do you need most urgently? Are there any hazards or access restrictions?"></textarea>
+      <div class="field-hint">The more detail you provide, the faster and more accurately we can scope a mission to help you.</div></div>
     <div class="field"><label>Category</label>
       <select id="ask-category">
         <option value="">Select category...</option>
@@ -289,7 +301,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
       <div id="ask-file-list" style="margin-top:6px;font-size:12px;color:var(--text2)"></div>
     </div>
     <div class="field"><label>Any special access instructions or safety hazards?</label><textarea id="ask-access" placeholder="Gate codes, dangerous areas, structural concerns, animals, etc." style="min-height:60px"></textarea></div>
-    <button class="btn btn-primary" onclick="submitAsk()" id="ask-submit-btn">
+    <button class="btn btn-primary" onclick="submitAsk()" id="ask-submit-btn" aria-label="Submit your help request">
       <i class="ti ti-send"></i> Submit request
     </button>
   </div>
@@ -298,16 +310,16 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 
 <!-- OFFER HELP -->
 <div class="page" id="page-offer">
-  <div class="form-card">
+  <div class="form-card" id="offer-form">
     <h2><i class="ti ti-heart-handshake" style="color:var(--green)"></i> Offer help</h2>
     <div class="sub">Offer your time, tools, and/or treasure to help others. Please specify available times, list any skills/credentials, and if offering tools/materials/vehicles please specify make, model, condition and include photos/videos and any special instructions.</div>
-    <div class="field"><label>Your name *</label><input id="offer-name" placeholder="Full name" type="text"></div>
+    <div class="field"><label>Your name <span class="required-star">*</span></label><input id="offer-name" placeholder="Full name" type="text"></div>
     <div class="field-row">
-      <div class="field"><label>Phone *</label><input id="offer-phone" placeholder="(555) 000-0000" type="tel"></div>
-      <div class="field"><label>Email *</label><input id="offer-email" placeholder="you@email.com" type="email"></div>
+      <div class="field"><label>Phone <span class="required-star" title="Phone or email required">*</span></label><input id="offer-phone" placeholder="(555) 000-0000" type="tel"></div>
+      <div class="field"><label>Email <span class="required-star" title="Phone or email required">*</span></label><input id="offer-email" placeholder="you@email.com" type="email"></div>
     </div>
     <div class="field"><label>Your location / area you can serve</label><input id="offer-location" placeholder="City, state or ZIP — how far can you travel?"></div>
-    <div class="field"><label>What are you offering? (check all that apply)</label>
+    <div class="field" id="offer-type-group"><label>What are you offering? <span class="required-star">*</span></label>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="time" class="offer-type"> Time / labor</label>
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" value="skills" class="offer-type"> Skilled work</label>
@@ -368,14 +380,14 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   <div class="sh" style="margin-bottom:16px"><h3 style="font-size:18px">Coordinator dashboard</h3></div>
   <div id="bottleneck-alerts"></div>
   <div class="tab-bar">
-    <button class="active" onclick="coordTab('missions')">Missions &amp; tasks</button>
+    <button class="active" onclick="coordTab('approval')">⏳ Approval queue</button>
+    <button onclick="coordTab('missions')">Missions</button>
     <button onclick="coordTab('reviews')">Pending reviews</button>
-    <button onclick="coordTab('asks')">Raw asks</button>
     <button onclick="coordTab('volunteers')">Volunteers</button>
   </div>
-  <div id="coord-missions-tab"></div>
+  <div id="coord-approval-tab"></div>
+  <div id="coord-missions-tab" style="display:none"></div>
   <div id="coord-reviews-tab" style="display:none"></div>
-  <div id="coord-asks-tab" style="display:none"></div>
   <div id="coord-volunteers-tab" style="display:none"></div>
 </div>
 
@@ -447,7 +459,21 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   </div>
 </div>
 
+<script src="/config.js"></script>
 <script src="app.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI&callback=initMap" async defer></script>
+<script>
+// Fires if Maps API key is invalid, restricted, or billing is not enabled
+function gm_authFailure() {
+  console.error('[Maps] Authentication failure — API key invalid, restricted, or billing not enabled');
+  ['home-map','missions-map'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.cssText = 'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:#FEF0EA';
+    el.innerHTML = '<div style="font-size:13px;color:#B03D10;font-weight:600;font-family:Inter,sans-serif">⚠ Map authentication failed</div><div style="font-size:12px;color:#6B7280;font-family:Inter,sans-serif;text-align:center;max-width:300px">The Google Maps API key is invalid or restricted. Check the browser console for details.</div>';
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI&callback=initMap&loading=async" async defer
+  onerror="console.error('[Maps] Script failed to load — check network and API key restrictions')"></script>
 </body>
 </html>
