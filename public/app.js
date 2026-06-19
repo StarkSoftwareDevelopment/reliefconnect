@@ -819,27 +819,35 @@ const MAP_OPTIONS = {
 };
 
 function initMap() {
-  // Maps API is ready — initialize the home map immediately (it's visible on load)
-  // The missions map is initialized lazily when that page is first shown,
-  // because Google Maps cannot render into a display:none element.
   window._mapsApiReady = true;
-  initHomeMap();
+  // Defer until after the browser has painted so the container has real dimensions.
+  // Maps initialized into zero-size elements render blank and don't recover.
+  setTimeout(initHomeMap, 100);
 }
 
 function initHomeMap() {
-  if (homeMap) return; // already done
+  if (homeMap) return;
   const el = document.getElementById('home-map');
   if (!el) return;
+  // Double-check the element is actually visible and has dimensions
+  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+    setTimeout(initHomeMap, 200);
+    return;
+  }
   homeMap = new google.maps.Map(el, MAP_OPTIONS);
-  renderMapPins();
+  google.maps.event.addListenerOnce(homeMap, 'idle', () => renderMapPins());
 }
 
 function initMissionsMap() {
-  if (map) return; // already done
+  if (map) return;
   const el = document.getElementById('missions-map');
   if (!el) return;
+  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+    setTimeout(initMissionsMap, 200);
+    return;
+  }
   map = new google.maps.Map(el, MAP_OPTIONS);
-  renderMapPins();
+  google.maps.event.addListenerOnce(map, 'idle', () => renderMapPins());
 }
 
 async function geocodeAddress(address) {
@@ -872,17 +880,15 @@ async function renderMapPins() {
     const done = parseInt(mission.completed_tasks) || 0;
     const pct = total ? Math.round(done / total * 100) : 0;
 
-    // Custom pin SVG with exclamation mark
-    const svgPin = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
-      <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 24 16 24s16-14 16-24C32 7.163 24.837 0 16 0z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
-      <text x="16" y="22" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="900" fill="#fff">!</text>
-    </svg>`;
     const markerOptions = {
       position: pos, title: mission.title,
       icon: {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgPin),
-        scaledSize: new google.maps.Size(32, 40),
-        anchor: new google.maps.Point(16, 40)
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: color,
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+        scale: 10
       }
     };
 
