@@ -801,12 +801,15 @@ function renderAll() {
 }
 
 // ===== GOOGLE MAPS =====
-let map = null;
-let homeMap = null;
-let mapMarkers = [];
-let homeMapMarkers = [];
+// MAP_OPTIONS must be declared before initMap() because the Maps API
+// calls initMap() as soon as the script loads — before the rest of the
+// file is parsed if using const (which is NOT hoisted).
+var map = null;
+var homeMap = null;
+var mapMarkers = [];
+var homeMapMarkers = [];
 
-const MAP_OPTIONS = {
+var MAP_OPTIONS = {
   zoom: 5,
   center: { lat: 39.5, lng: -98.35 },
   mapTypeControl: false,
