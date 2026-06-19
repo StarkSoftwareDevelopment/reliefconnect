@@ -137,8 +137,21 @@ function showPage(p) {
   document.getElementById('page-' + p)?.classList.add('active');
   document.getElementById('nav-' + p)?.classList.add('active');
   if (p === 'coordinator') renderCoordinator();
-  if (p === 'missions') { renderMissionsList(); if (map) renderMapPins(); }
-  if (p === 'home') { renderHome(); if (homeMap) renderMapPins(); }
+  if (p === 'missions') {
+    renderMissionsList();
+    if (window._mapsApiReady && !map) {
+      initMissionsMap();
+    } else if (map) {
+      // Trigger resize in case the container was hidden when map was last rendered
+      google.maps.event.trigger(map, 'resize');
+      renderMapPins();
+    }
+  }
+  if (p === 'home') {
+    renderHome();
+    if (window._mapsApiReady && !homeMap) initHomeMap();
+    else if (homeMap) renderMapPins();
+  }
 }
 
 function backToMissions() { showPage(state.missionDetailOrigin === 'coordinator' ? 'coordinator' : 'missions'); }
@@ -806,8 +819,26 @@ const MAP_OPTIONS = {
 };
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById('missions-map'), MAP_OPTIONS);
-  homeMap = new google.maps.Map(document.getElementById('home-map'), MAP_OPTIONS);
+  // Maps API is ready — initialize the home map immediately (it's visible on load)
+  // The missions map is initialized lazily when that page is first shown,
+  // because Google Maps cannot render into a display:none element.
+  window._mapsApiReady = true;
+  initHomeMap();
+}
+
+function initHomeMap() {
+  if (homeMap) return; // already done
+  const el = document.getElementById('home-map');
+  if (!el) return;
+  homeMap = new google.maps.Map(el, MAP_OPTIONS);
+  renderMapPins();
+}
+
+function initMissionsMap() {
+  if (map) return; // already done
+  const el = document.getElementById('missions-map');
+  if (!el) return;
+  map = new google.maps.Map(el, MAP_OPTIONS);
   renderMapPins();
 }
 
