@@ -831,11 +831,20 @@ function initHomeMap() {
   if (homeMap) return;
   const el = document.getElementById('home-map');
   if (!el) { console.warn('[Maps] home-map element not found'); return; }
+  // Force height via JS in case CSS hasn't applied yet
+  if (!el.style.height || el.style.height === '0px') {
+    el.style.height = '380px';
+    el.style.minHeight = '380px';
+    el.style.display = 'block';
+  }
   const w = el.offsetWidth, h = el.offsetHeight;
   console.log(`[Maps] home-map dimensions: ${w}x${h}`);
   if (w === 0 || h === 0) {
-    console.warn('[Maps] home-map is zero-size, retrying in 200ms');
-    setTimeout(initHomeMap, 200);
+    console.warn('[Maps] home-map is zero-size, forcing height and retrying in 300ms');
+    el.style.height = '380px';
+    el.style.minHeight = '380px';
+    el.style.display = 'block';
+    setTimeout(initHomeMap, 300);
     return;
   }
   try {
@@ -843,6 +852,8 @@ function initHomeMap() {
     console.log('[Maps] homeMap initialized successfully');
     google.maps.event.addListenerOnce(homeMap, 'idle', () => {
       console.log('[Maps] homeMap idle — rendering pins');
+      // Trigger resize to ensure map fills container correctly
+      google.maps.event.trigger(homeMap, 'resize');
       renderMapPins();
     });
   } catch(e) {
