@@ -461,6 +461,19 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 
 <script src="/config.js"></script>
 <script src="app.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI&callback=initMap" async defer></script>
+<script>
+// Fires if Maps API key is invalid, restricted, or billing is not enabled
+function gm_authFailure() {
+  console.error('[Maps] Authentication failure — API key invalid, restricted, or billing not enabled');
+  ['home-map','missions-map'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.cssText = 'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:#FEF0EA';
+    el.innerHTML = '<div style="font-size:13px;color:#B03D10;font-weight:600;font-family:Inter,sans-serif">⚠ Map authentication failed</div><div style="font-size:12px;color:#6B7280;font-family:Inter,sans-serif;text-align:center;max-width:300px">The Google Maps API key is invalid or restricted. Check the browser console for details.</div>';
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI&callback=initMap&loading=async" async defer
+  onerror="console.error('[Maps] Script failed to load — check network and API key restrictions')"></script>
 </body>
 </html>

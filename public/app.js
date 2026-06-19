@@ -820,34 +820,72 @@ const MAP_OPTIONS = {
 
 function initMap() {
   window._mapsApiReady = true;
-  // Defer until after the browser has painted so the container has real dimensions.
-  // Maps initialized into zero-size elements render blank and don't recover.
+  console.log('[Maps] API loaded and ready');
   setTimeout(initHomeMap, 100);
 }
 
 function initHomeMap() {
   if (homeMap) return;
   const el = document.getElementById('home-map');
-  if (!el) return;
-  // Double-check the element is actually visible and has dimensions
-  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+  if (!el) { console.warn('[Maps] home-map element not found'); return; }
+  const w = el.offsetWidth, h = el.offsetHeight;
+  console.log(`[Maps] home-map dimensions: ${w}x${h}`);
+  if (w === 0 || h === 0) {
+    console.warn('[Maps] home-map is zero-size, retrying in 200ms');
     setTimeout(initHomeMap, 200);
     return;
   }
-  homeMap = new google.maps.Map(el, MAP_OPTIONS);
-  google.maps.event.addListenerOnce(homeMap, 'idle', () => renderMapPins());
+  try {
+    homeMap = new google.maps.Map(el, MAP_OPTIONS);
+    console.log('[Maps] homeMap initialized successfully');
+    google.maps.event.addListenerOnce(homeMap, 'idle', () => {
+      console.log('[Maps] homeMap idle — rendering pins');
+      renderMapPins();
+    });
+  } catch(e) {
+    console.error('[Maps] homeMap init error:', e);
+    showMapError(el, e.message);
+  }
 }
 
 function initMissionsMap() {
   if (map) return;
   const el = document.getElementById('missions-map');
-  if (!el) return;
-  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+  if (!el) { console.warn('[Maps] missions-map element not found'); return; }
+  const w = el.offsetWidth, h = el.offsetHeight;
+  console.log(`[Maps] missions-map dimensions: ${w}x${h}`);
+  if (w === 0 || h === 0) {
+    console.warn('[Maps] missions-map is zero-size, retrying in 200ms');
     setTimeout(initMissionsMap, 200);
     return;
   }
-  map = new google.maps.Map(el, MAP_OPTIONS);
-  google.maps.event.addListenerOnce(map, 'idle', () => renderMapPins());
+  try {
+    map = new google.maps.Map(el, MAP_OPTIONS);
+    console.log('[Maps] map initialized successfully');
+    google.maps.event.addListenerOnce(map, 'idle', () => {
+      console.log('[Maps] map idle — rendering pins');
+      renderMapPins();
+    });
+  } catch(e) {
+    console.error('[Maps] map init error:', e);
+    showMapError(el, e.message);
+  }
+}
+
+function showMapError(container, message) {
+  container.style.background = '#FEF0EA';
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.justifyContent = 'center';
+  container.style.flexDirection = 'column';
+  container.style.gap = '8px';
+  container.innerHTML = `
+    <div style="font-size:13px;color:#B03D10;font-weight:600;font-family:Inter,sans-serif">
+      <i class="ti ti-map-off"></i> Map could not load
+    </div>
+    <div style="font-size:12px;color:#6B7280;font-family:Inter,sans-serif;text-align:center;max-width:300px">
+      ${message || 'Check your browser console for details.'}
+    </div>`;
 }
 
 async function geocodeAddress(address) {
