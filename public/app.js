@@ -145,23 +145,37 @@ function backToMissions() { showPage(state.missionDetailOrigin === 'coordinator'
 
 // ===== LOAD DATA =====
 async function loadData() {
+  if (!SUPABASE_URL) {
+    showBanner('Database not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in your environment variables.', 'warning');
+    renderAll();
+    return;
+  }
   try {
-    // Load published projects (not pending_approval — those are hidden from public)
     state.projects = await sbQuery('project_summary', 'status=neq.pending_approval&order=created_at.desc');
     state.bottlenecks = await sbQuery('open_bottlenecks', 'resolved=eq.false&order=created_at.desc');
     updateAlertCount();
   } catch (e) {
     console.warn('Data load error:', e);
+    showBanner('Could not load mission data. Check your internet connection and refresh the page.', 'warning');
   }
   renderAll();
 }
 
 // ===== SUBMIT ASK =====
 async function submitAsk() {
+  // Clear previous errors
+  clearFormErrors('ask-form');
+
   const name = document.getElementById('ask-name').value.trim();
   const desc = document.getElementById('ask-desc').value.trim();
   const address = document.getElementById('ask-address').value.trim();
-  if (!name || !desc || !address) { alert('Please fill in your name, address, and description.'); return; }
+
+  let hasErrors = false;
+  if (!name) { showFieldError('ask-name', 'Your name is required so we can contact you.'); hasErrors = true; }
+  if (!address) { showFieldError('ask-address', 'A full address is required so volunteers can find you.'); hasErrors = true; }
+  if (!desc) { showFieldError('ask-desc', 'Please describe what happened and what you need help with.'); hasErrors = true; }
+  else if (desc.split(/\s+/).length < 10) { showFieldError('ask-desc', 'Please add more detail — the more you tell us, the better we can scope the mission. Aim for at least a few sentences.'); hasErrors = true; }
+  if (hasErrors) { document.querySelector('#page-ask .field-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
   const btn = document.getElementById('ask-submit-btn');
   btn.innerHTML = `<span class="spinner"></span> Generating mission scope...`;
@@ -198,7 +212,13 @@ async function submitAsk() {
     btn.innerHTML = `<i class="ti ti-send"></i> Update request`;
     btn.disabled = false;
   } catch (e) {
-    alert('Error submitting request: ' + e.message);
+    console.error('submitAsk error:', e);
+    const msg = e.message?.includes('Failed to fetch')
+      ? 'Could not reach the server. Please check your internet connection and try again.'
+      : e.message?.includes('API key')
+      ? 'The AI service is not configured. Please contact the coordinator.'
+      : `Something went wrong: ${e.message}. Please try again or call us directly.`;
+    showBanner(msg, 'error');
     btn.innerHTML = `<i class="ti ti-send"></i> Submit request`;
     btn.disabled = false;
   }
@@ -206,8 +226,18 @@ async function submitAsk() {
 
 // ===== SUBMIT OFFER =====
 async function submitOffer() {
+  clearFormErrors('offer-form');
   const name = document.getElementById('offer-name').value.trim();
-  if (!name) { alert('Please enter your name.'); return; }
+  const phone = document.getElementById('offer-phone').value.trim();
+  const email = document.getElementById('offer-email').value.trim();
+  const types = [...document.querySelectorAll('.offer-type:checked')].map(c => c.value);
+
+  let hasErrors = false;
+  if (!name) { showFieldError('offer-name', 'Your name is required.'); hasErrors = true; }
+  if (!phone && !email) { showFieldError('offer-phone', 'Please provide at least a phone number or email so we can reach you.'); hasErrors = true; }
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showFieldError('offer-email', 'Please enter a valid email address.'); hasErrors = true; }
+  if (types.length === 0) { showFieldError('offer-type-group', 'Please select at least one thing you can offer.'); hasErrors = true; }
+  if (hasErrors) { document.querySelector('#page-offer .field-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
   try {
     await api('/api/people', {
       name,
@@ -219,7 +249,11 @@ async function submitOffer() {
     document.getElementById('offer-result').style.display = 'block';
     document.getElementById('offer-result').innerHTML = `<div class="form-card"><div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:50%;background:var(--green-light);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px"><i class="ti ti-circle-check"></i></div><div><div style="font-weight:600">Thank you, ${esc(name)}!</div><div style="font-size:13px;color:var(--text2)">Your offer has been recorded. A coordinator will reach out when there's a mission that matches your skills and availability.</div></div></div></div>`;
   } catch (e) {
-    alert('Error submitting offer: ' + e.message);
+    console.error('submitOffer error:', e);
+    const msg = e.message?.includes('Failed to fetch')
+      ? 'Could not reach the server. Please check your connection and try again.'
+      : `Something went wrong: ${e.message}. Please try again.`;
+    showBanner(msg, 'error');
   }
 }
 
@@ -387,7 +421,14 @@ function closeSubmitModal(e) {
 
 async function submitTaskUpdate() {
   const notes = document.getElementById('sub-notes').value.trim();
-  if (!notes) { alert('Please describe what was completed.'); return; }
+  if (!notes) {
+    showFieldError('sub-notes', 'Please describe what was completed. The reviewer needs enough detail to evaluate your work against the acceptance tests.');
+    return;
+  }
+  if (notes.split(/\s+/).length < 5) {
+    showFieldError('sub-notes', 'Please add more detail — describe what specifically was done, including any measurements or materials used.');
+    return;
+  }
   const { projectId, taskId } = state.submittingTask;
   try {
     await api(`/api/tasks/${taskId}/submit`, {
@@ -423,7 +464,10 @@ function closeBottleneckModal(e) {
 
 async function submitBottleneck() {
   const desc = document.getElementById('bn-desc').value.trim();
-  if (!desc) { alert('Please describe the bottleneck.'); return; }
+  if (!desc) {
+    showFieldError('bn-desc', 'Please describe what is blocking you and what you need to continue.');
+    return;
+  }
   const { projectId, taskId } = state.bottleneckTask;
   try {
     await api(`/api/tasks/${taskId}/bottleneck`, {
@@ -462,7 +506,10 @@ function closeReviewModal(e) {
 
 async function approveTask() {
   const notes = document.getElementById('review-notes').value.trim();
-  if (!notes) { alert('Please enter review notes.'); return; }
+  if (!notes) {
+    showFieldError('review-notes', 'Review notes are required. Describe what you verified and how.');
+    return;
+  }
   const { projectId, taskId } = state.reviewingTask;
   try {
     await api(`/api/tasks/${taskId}/review`, { outcome: 'pass', notes, reviewerEmail: settings.email });
@@ -475,7 +522,10 @@ async function approveTask() {
 
 async function failTask() {
   const notes = document.getElementById('review-notes').value.trim();
-  if (!notes) { alert('Please enter notes explaining what failed.'); return; }
+  if (!notes) {
+    showFieldError('review-notes', 'Failure notes are required — cite the specific acceptance test number and explain exactly what must be corrected before resubmitting.');
+    return;
+  }
   const { projectId, taskId } = state.reviewingTask;
   try {
     await api(`/api/tasks/${taskId}/review`, { outcome: 'fail', notes, reviewerEmail: settings.email });
@@ -791,9 +841,18 @@ async function renderMapPins() {
     const done = parseInt(mission.completed_tasks) || 0;
     const pct = total ? Math.round(done / total * 100) : 0;
 
+    // Custom pin SVG with exclamation mark
+    const svgPin = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+      <path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 24 16 24s16-14 16-24C32 7.163 24.837 0 16 0z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+      <text x="16" y="22" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="900" fill="#fff">!</text>
+    </svg>`;
     const markerOptions = {
       position: pos, title: mission.title,
-      icon: { path: google.maps.SymbolPath.CIRCLE, fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2, scale: 10 }
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgPin),
+        scaledSize: new google.maps.Size(32, 40),
+        anchor: new google.maps.Point(16, 40)
+      }
     };
 
     const infoContent = `<div style="font-family:Inter,sans-serif;padding:4px;max-width:220px">
@@ -825,6 +884,55 @@ async function renderMapPins() {
       });
     });
   }
+}
+
+
+// ===== FORM VALIDATION HELPERS =====
+function showFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  // Remove any existing error
+  field.classList.add('field-invalid');
+  const existing = field.parentElement.querySelector('.field-error');
+  if (existing) existing.remove();
+  const err = document.createElement('div');
+  err.className = 'field-error';
+  err.innerHTML = `<i class="ti ti-alert-circle"></i> ${esc(message)}`;
+  field.parentElement.appendChild(err);
+  field.addEventListener('input', () => clearFieldError(fieldId), { once: true });
+}
+
+function clearFieldError(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  field.classList.remove('field-invalid');
+  field.parentElement.querySelector('.field-error')?.remove();
+}
+
+function clearFormErrors(formId) {
+  document.querySelectorAll('.field-invalid').forEach(el => el.classList.remove('field-invalid'));
+  document.querySelectorAll('.field-error').forEach(el => el.remove());
+}
+
+// ===== GLOBAL BANNER =====
+let bannerTimeout = null;
+function showBanner(message, type = 'error') {
+  let banner = document.getElementById('global-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'global-banner';
+    document.querySelector('nav').after(banner);
+  }
+  const colors = {
+    error: { bg: 'var(--red-light)', border: '#FECACA', icon: 'ti-alert-circle', color: 'var(--red)' },
+    warning: { bg: 'var(--amber-light)', border: '#FDE68A', icon: 'ti-alert-triangle', color: 'var(--amber)' },
+    success: { bg: 'var(--green-light)', border: '#BBF7D0', icon: 'ti-circle-check', color: 'var(--green)' }
+  };
+  const c = colors[type] || colors.error;
+  banner.style.cssText = `background:${c.bg};border-bottom:1px solid ${c.border};padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:13px;color:${c.color}`;
+  banner.innerHTML = `<i class="ti ${c.icon}"></i><span style="flex:1">${esc(message)}</span><button onclick="document.getElementById('global-banner').style.display='none'" style="background:none;border:none;cursor:pointer;color:${c.color};font-size:16px">×</button>`;
+  if (bannerTimeout) clearTimeout(bannerTimeout);
+  if (type === 'success') bannerTimeout = setTimeout(() => { banner.style.display = 'none'; }, 4000);
 }
 
 // ===== INIT =====
