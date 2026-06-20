@@ -826,6 +826,9 @@ function initMap() {
   console.log('[Maps] API loaded and ready');
   setTimeout(initHomeMap, 100);
 }
+// Explicitly assign to window so Maps callback can always find it
+// regardless of module scope or strict mode
+window.initMap = initMap;
 
 function initHomeMap() {
   if (homeMap) return;
