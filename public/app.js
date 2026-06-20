@@ -831,19 +831,17 @@ function initHomeMap() {
   if (homeMap) return;
   const el = document.getElementById('home-map');
   if (!el) { console.warn('[Maps] home-map element not found'); return; }
-  // Force height via JS in case CSS hasn't applied yet
-  if (!el.style.height || el.style.height === '0px') {
-    el.style.height = '380px';
-    el.style.minHeight = '380px';
-    el.style.display = 'block';
-  }
-  const w = el.offsetWidth, h = el.offsetHeight;
-  console.log(`[Maps] home-map dimensions: ${w}x${h}`);
+  // Height lives on the parent wrapper div (fully inline-styled),
+  // so Google Maps measures the parent, not el itself.
+  // Just ensure el fills the parent.
+  el.style.width = '100%';
+  el.style.height = '100%';
+  const parent = el.parentElement;
+  const w = parent ? parent.offsetWidth : el.offsetWidth;
+  const h = parent ? parent.offsetHeight : el.offsetHeight;
+  console.log(`[Maps] home-map parent dimensions: ${w}x${h}`);
   if (w === 0 || h === 0) {
-    console.warn('[Maps] home-map is zero-size, forcing height and retrying in 300ms');
-    el.style.height = '380px';
-    el.style.minHeight = '380px';
-    el.style.display = 'block';
+    console.warn('[Maps] home-map parent is zero-size, retrying in 300ms');
     setTimeout(initHomeMap, 300);
     return;
   }
@@ -852,7 +850,6 @@ function initHomeMap() {
     console.log('[Maps] homeMap initialized successfully');
     google.maps.event.addListenerOnce(homeMap, 'idle', () => {
       console.log('[Maps] homeMap idle — rendering pins');
-      // Trigger resize to ensure map fills container correctly
       google.maps.event.trigger(homeMap, 'resize');
       renderMapPins();
     });
