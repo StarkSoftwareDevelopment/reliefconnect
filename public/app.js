@@ -1,3 +1,16 @@
+// ===== GOOGLE MAPS CALLBACK — must be first so Maps API can call it =====
+// The Maps API fires callback=initMap as soon as its script loads,
+// potentially before the rest of this file is parsed. By assigning
+// window.initMap here at the very top, it's available immediately.
+window.initMap = function() {
+  window._mapsApiReady = true;
+  console.log('[Maps] API loaded and ready');
+  setTimeout(function() {
+    if (typeof initHomeMap === 'function') initHomeMap();
+    else console.error('[Maps] initHomeMap not defined yet');
+  }, 100);
+};
+
 /**
  * ReliefConnect — Frontend App
  * Data layer: Supabase (via REST API and Netlify backend functions)
@@ -826,9 +839,6 @@ function initMap() {
   console.log('[Maps] API loaded and ready');
   setTimeout(initHomeMap, 100);
 }
-// Explicitly assign to window so Maps callback can always find it
-// regardless of module scope or strict mode
-window.initMap = initMap;
 
 function initHomeMap() {
   if (homeMap) return;
