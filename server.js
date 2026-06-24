@@ -15,6 +15,7 @@ window.ANTHROPIC_API_KEY = ${JSON.stringify(process.env.volunteerdisasterrelief_
 window.SUPABASE_URL = ${JSON.stringify(process.env.SUPABASE_URL || '')};
 window.SUPABASE_ANON_KEY = ${JSON.stringify(process.env.SUPABASE_ANON_KEY || '')};
 window.COORDINATOR_EMAIL = ${JSON.stringify(process.env.COORDINATOR_EMAIL || 'bjlinville1@gmail.com')};
+window.GOOGLE_MAPS_KEY = ${JSON.stringify(process.env.GOOGLE_MAPS_KEY || '')};
   `);
 });
 

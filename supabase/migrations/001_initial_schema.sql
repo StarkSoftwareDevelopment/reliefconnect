@@ -1,5 +1,5 @@
 -- ReliefConnect — Initial Schema Migration
--- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/swrmanfxqorpwstsrygl/sql
+-- Run this in Supabase SQL Editor: https://supabase.com/dashboard/project/YOUR_PROJECT_REF/sql
 
 -- ============================================================
 -- EXTENSIONS

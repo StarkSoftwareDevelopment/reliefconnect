@@ -914,7 +914,7 @@ function showMapError(container, message) {
 
 async function geocodeAddress(address) {
   const encoded = encodeURIComponent(address);
-  const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encoded}&key=AIzaSyBug2gx9_S97yQSWQmHMMk5w8qEHkzk-EI`);
+  const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encoded}&key=${window.GOOGLE_MAPS_KEY||""}`);
   const data = await res.json();
   if (data.results?.[0]) return data.results[0].geometry.location;
   return null;

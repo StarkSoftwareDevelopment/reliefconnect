@@ -110,6 +110,7 @@ export default async (req) => {
 
 async function generateProjectScope(ask, attemptNumber, denialContext = null) {
   const apiKey = Netlify.env.get('volunteerdisasterrelief_anthropic_api_key');
+  const mapsKey = Netlify.env.get('GOOGLE_MAPS_KEY') || '';
 
   const denialSection = denialContext ? `
 PREVIOUS ATTEMPT WAS DENIED. Denial reason: "${denialContext.reason}"

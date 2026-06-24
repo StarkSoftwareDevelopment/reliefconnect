@@ -82,7 +82,7 @@ cp .env.example .env
 Open `.env` and add your Anthropic API key:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=sk-ant-your_key_here
 ```
 
 > **Security note:** Never commit `.env` to version control. It's already in `.gitignore`.  
