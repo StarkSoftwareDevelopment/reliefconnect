@@ -1,15 +1,4 @@
-// ===== GOOGLE MAPS CALLBACK — must be first so Maps API can call it =====
-// The Maps API fires callback=initMap as soon as its script loads,
-// potentially before the rest of this file is parsed. By assigning
-// window.initMap here at the very top, it's available immediately.
-window.initMap = function() {
-  window._mapsApiReady = true;
-  console.log('[Maps] API loaded and ready');
-  setTimeout(function() {
-    if (typeof initHomeMap === 'function') initHomeMap();
-    else console.error('[Maps] initHomeMap not defined yet');
-  }, 100);
-};
+
 
 /**
  * ReliefConnect — Frontend App
@@ -152,18 +141,14 @@ function showPage(p) {
   if (p === 'coordinator') renderCoordinator();
   if (p === 'missions') {
     renderMissionsList();
-    if (window._mapsApiReady && !map) {
-      initMissionsMap();
-    } else if (map) {
-      // Trigger resize in case the container was hidden when map was last rendered
+    if (map) {
       google.maps.event.trigger(map, 'resize');
       renderMapPins();
     }
   }
   if (p === 'home') {
     renderHome();
-    if (window._mapsApiReady && !homeMap) initHomeMap();
-    else if (homeMap) renderMapPins();
+    if (homeMap) renderMapPins();
   }
 }
 
@@ -835,81 +820,9 @@ var MAP_OPTIONS = {
 };
 
 function initMap() {
-  window._mapsApiReady = true;
-  console.log('[Maps] API loaded and ready');
-  setTimeout(initHomeMap, 100);
-}
-
-function initHomeMap() {
-  if (homeMap) return;
-  const el = document.getElementById('home-map');
-  if (!el) { console.warn('[Maps] home-map element not found'); return; }
-  // Height lives on the parent wrapper div (fully inline-styled),
-  // so Google Maps measures the parent, not el itself.
-  // Just ensure el fills the parent.
-  el.style.width = '100%';
-  el.style.height = '100%';
-  const parent = el.parentElement;
-  const w = parent ? parent.offsetWidth : el.offsetWidth;
-  const h = parent ? parent.offsetHeight : el.offsetHeight;
-  console.log(`[Maps] home-map parent dimensions: ${w}x${h}`);
-  if (w === 0 || h === 0) {
-    console.warn('[Maps] home-map parent is zero-size, retrying in 300ms');
-    setTimeout(initHomeMap, 300);
-    return;
-  }
-  try {
-    homeMap = new google.maps.Map(el, MAP_OPTIONS);
-    console.log('[Maps] homeMap initialized successfully');
-    google.maps.event.addListenerOnce(homeMap, 'idle', () => {
-      console.log('[Maps] homeMap idle — rendering pins');
-      google.maps.event.trigger(homeMap, 'resize');
-      renderMapPins();
-    });
-  } catch(e) {
-    console.error('[Maps] homeMap init error:', e);
-    showMapError(el, e.message);
-  }
-}
-
-function initMissionsMap() {
-  if (map) return;
-  const el = document.getElementById('missions-map');
-  if (!el) { console.warn('[Maps] missions-map element not found'); return; }
-  const w = el.offsetWidth, h = el.offsetHeight;
-  console.log(`[Maps] missions-map dimensions: ${w}x${h}`);
-  if (w === 0 || h === 0) {
-    console.warn('[Maps] missions-map is zero-size, retrying in 200ms');
-    setTimeout(initMissionsMap, 200);
-    return;
-  }
-  try {
-    map = new google.maps.Map(el, MAP_OPTIONS);
-    console.log('[Maps] map initialized successfully');
-    google.maps.event.addListenerOnce(map, 'idle', () => {
-      console.log('[Maps] map idle — rendering pins');
-      renderMapPins();
-    });
-  } catch(e) {
-    console.error('[Maps] map init error:', e);
-    showMapError(el, e.message);
-  }
-}
-
-function showMapError(container, message) {
-  container.style.background = '#FEF0EA';
-  container.style.display = 'flex';
-  container.style.alignItems = 'center';
-  container.style.justifyContent = 'center';
-  container.style.flexDirection = 'column';
-  container.style.gap = '8px';
-  container.innerHTML = `
-    <div style="font-size:13px;color:#B03D10;font-weight:600;font-family:Inter,sans-serif">
-      <i class="ti ti-map-off"></i> Map could not load
-    </div>
-    <div style="font-size:12px;color:#6B7280;font-family:Inter,sans-serif;text-align:center;max-width:300px">
-      ${message || 'Check your browser console for details.'}
-    </div>`;
+  map = new google.maps.Map(document.getElementById('missions-map'), MAP_OPTIONS);
+  homeMap = new google.maps.Map(document.getElementById('home-map'), MAP_OPTIONS);
+  renderMapPins();
 }
 
 async function geocodeAddress(address) {

@@ -181,8 +181,8 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 .settings-section h3{font-size:15px;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
 
 /* MAP */
-.map-container{width:100%;height:380px;min-height:380px;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:16px;background:#e8e8e8;position:relative;display:block}
-#missions-map,#home-map{width:100% !important;height:380px !important;min-height:380px !important;display:block !important;border-radius:var(--radius)}
+.map-container{width:100%;height:380px;border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);margin-bottom:16px;background:#e8e8e8}
+#missions-map,#home-map{width:100%;height:100%}
 /* FILTER BAR */
 .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .filter-bar select,.filter-bar input{border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;background:#fff;color:var(--text);outline:none}
@@ -258,9 +258,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
     <div class="stat"><div class="n" id="stat-asks">0</div><div class="l">Requests received</div></div>
   </div>
   -->
-  <div style="width:100%;height:380px;border-radius:10px;overflow:hidden;border:0.5px solid #E5E7EB;margin-bottom:16px;background:#e8e8e8;box-sizing:border-box">
-    <div id="home-map" style="width:100%;height:380px"></div>
-  </div>
+  <div class="map-container"><div id="home-map"></div></div>
 </div>
 
 <!-- ASK FOR HELP -->
@@ -351,9 +349,7 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
 <!-- FIND MISSIONS -->
 <div class="page" id="page-missions">
   <div class="sh" style="margin-bottom:14px"><h3 style="font-size:18px">Find a mission</h3></div>
-  <div style="width:100%;height:380px;border-radius:10px;overflow:hidden;border:0.5px solid #E5E7EB;margin-bottom:16px;background:#e8e8e8;box-sizing:border-box">
-    <div id="missions-map" style="width:100%;height:380px"></div>
-  </div>
+  <div class="map-container"><div id="missions-map"></div></div>
   <div class="filter-bar">
     <select id="filter-category" onchange="filterMissions()">
       <option value="">All categories</option>
@@ -477,6 +473,7 @@ function gm_authFailure() {
   });
 }
 </script>
-<script>window._loadMaps=function(){var s=document.createElement("script");s.src="https://maps.googleapis.com/maps/api/js?key="+(window.GOOGLE_MAPS_KEY||"")+"&callback=initMap";document.head.appendChild(s);};window.addEventListener("load",window._loadMaps);</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=" id="maps-script" async defer></script>
+<script>document.getElementById("maps-script").src="https://maps.googleapis.com/maps/api/js?key="+(window.GOOGLE_MAPS_KEY||"")+"&callback=initMap";</script>
 </body>
 </html>
