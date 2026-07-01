@@ -3,6 +3,13 @@
   functions = "netlify/functions"
   command = "echo 'window.SUPABASE_URL=\"'$SUPABASE_URL'\";window.SUPABASE_ANON_KEY=\"'$SUPABASE_ANON_KEY'\";window.GOOGLE_MAPS_KEY=\"'$GOOGLE_MAPS_KEY'\";window.COORDINATOR_EMAIL=\"'${COORDINATOR_EMAIL:-bjlinville1@gmail.com}'\";' > public/config.js && echo 'Build complete'"
 
+# Tell Netlify these are intentionally public client-side keys
+# SUPABASE_ANON_KEY is designed to be public (RLS enforces access control)
+# GOOGLE_MAPS_KEY is designed to be public (domain restrictions enforce security)
+# SUPABASE_SERVICE_ROLE_KEY and Anthropic key are NOT listed here — they stay server-only
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,SUPABASE_URL,GOOGLE_MAPS_KEY"
+
 # Never cache HTML or config
 [[headers]]
   for = "/*.html"
@@ -20,12 +27,13 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SPA fallback
+# API functions
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
