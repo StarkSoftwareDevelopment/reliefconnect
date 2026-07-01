@@ -79,18 +79,18 @@ npm install
 cp .env.example .env
 ```
 
-Open `.env` and add your Anthropic API key:
+Open `.env` and add your server-side Anthropic API key:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-your_key_here
+volunteerdisasterrelief_anthropic_api_key=your_anthropic_api_key
 ```
 
 > **Security note:** Never commit `.env` to version control. It's already in `.gitignore`.  
-> For production deployments, route Anthropic API calls through a backend endpoint rather than exposing the key to the browser.
+> Anthropic API calls are routed through backend functions. Do not expose this key to the browser.
 
 ### 4. Add the config script to index.html
 
-The server injects your API key via `/config.js`. Make sure the following `<script>` tag appears **before** `app.js` in `public/index.html`:
+The server injects public browser configuration via `/config.js`. Make sure the following `<script>` tag appears **before** `app.js` in `public/index.html`:
 
 ```html
 <script src="/config.js"></script>
