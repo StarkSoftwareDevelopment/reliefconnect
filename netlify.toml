@@ -1,31 +1,31 @@
 [build]
   publish = "public"
   functions = "netlify/functions"
+  command = "echo 'window.SUPABASE_URL=\"'$SUPABASE_URL'\";window.SUPABASE_ANON_KEY=\"'$SUPABASE_ANON_KEY'\";window.GOOGLE_MAPS_KEY=\"'$GOOGLE_MAPS_KEY'\";window.COORDINATOR_EMAIL=\"'${COORDINATOR_EMAIL:-bjlinville1@gmail.com}'\";' > public/config.js && echo 'Build complete'"
 
-# Never cache HTML
+# Never cache HTML or config
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-# Cache JS/CSS aggressively
+[[headers]]
+  for = "/config.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Cache other JS aggressively
 [[headers]]
   for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Functions take priority — do NOT redirect /config.js or /api/* to index.html
-[[redirects]]
-  from = "/config.js"
-  to = "/.netlify/functions/config"
-  status = 200
-
+# SPA fallback
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# SPA fallback — must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
