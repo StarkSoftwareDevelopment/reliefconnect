@@ -11,7 +11,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/config.js', (req, res) => {
   res.type('application/javascript');
   res.send(`
-window.ANTHROPIC_API_KEY = ${JSON.stringify(process.env.volunteerdisasterrelief_anthropic_api_key || '')};
 window.SUPABASE_URL = ${JSON.stringify(process.env.SUPABASE_URL || '')};
 window.SUPABASE_ANON_KEY = ${JSON.stringify(process.env.SUPABASE_ANON_KEY || '')};
 window.COORDINATOR_EMAIL = ${JSON.stringify(process.env.COORDINATOR_EMAIL || 'bjlinville1@gmail.com')};
