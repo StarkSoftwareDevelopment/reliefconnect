@@ -2,23 +2,30 @@
   publish = "public"
   functions = "netlify/functions"
 
-# Never cache HTML — always serve fresh so JS filename changes take effect
+# Never cache HTML
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-# Cache JS/CSS aggressively — filenames change when content changes
+# Cache JS/CSS aggressively
 [[headers]]
   for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# Functions take priority — do NOT redirect /config.js or /api/* to index.html
+[[redirects]]
+  from = "/config.js"
+  to = "/.netlify/functions/config"
+  status = 200
 
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback — must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
