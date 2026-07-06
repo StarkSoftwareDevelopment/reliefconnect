@@ -2,7 +2,6 @@
   publish = "public"
   functions = "netlify/functions"
 
-# Tell Netlify these public keys in index.html are intentional
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,SUPABASE_URL,GOOGLE_MAPS_KEY"
 
@@ -11,11 +10,21 @@
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
+# Route /config.js to the function — force=true overrides the static file check
+[[redirects]]
+  from = "/config.js"
+  to = "/.netlify/functions/config"
+  status = 200
+  force = true
+
+# Route /api/* to functions
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+  force = true
 
+# SPA fallback — must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
