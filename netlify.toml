@@ -1,32 +1,21 @@
 [build]
   publish = "public"
   functions = "netlify/functions"
-  command = "echo 'Build complete'"
 
-# Never cache HTML or config
+# Tell Netlify these public keys in index.html are intentional
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,SUPABASE_URL,GOOGLE_MAPS_KEY"
+
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-[[headers]]
-  for = "/config.js"
-  [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
-
-# Cache other JS aggressively
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# API functions
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
