@@ -181,8 +181,9 @@ async function submitAsk() {
   let hasErrors = false;
   if (!name) { showFieldError('ask-name', 'Your name is required so we can contact you.'); hasErrors = true; }
   if (!address) { showFieldError('ask-address', 'A full address is required so volunteers can find you.'); hasErrors = true; }
-  if (!desc) { showFieldError('ask-desc', 'Please describe what happened and what you need help with.'); hasErrors = true; }
-  else if (desc.split(/\s+/).length < 10) { showFieldError('ask-desc', 'Please add more detail — the more you tell us, the better we can scope the mission. Aim for at least a few sentences.'); hasErrors = true; }
+  if (!desc) { showFieldError('ask-desc', 'Please describe what happened and what you need help with (10–2000 characters).'); hasErrors = true; }
+  else if (desc.length < 10) { showFieldError('ask-desc', 'Please add more detail (minimum 10 characters).'); hasErrors = true; }
+  else if (desc.length > 2000) { showFieldError('ask-desc', `Description is too long — please keep it under 2000 characters (currently ${desc.length}).`); hasErrors = true; }
   if (hasErrors) { document.querySelector('#page-ask .field-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
   const btn = document.getElementById('ask-submit-btn');
