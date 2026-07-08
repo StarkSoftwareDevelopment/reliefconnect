@@ -10,21 +10,24 @@
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-# Route /config.js to the function — force=true overrides the static file check
+# Only cache JS files that aren't our config
+[[headers]]
+  for = "/rc-app.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
 [[redirects]]
-  from = "/config.js"
+  from = "/rc-config.js"
   to = "/.netlify/functions/config"
   status = 200
   force = true
 
-# Route /api/* to functions
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
-# SPA fallback — must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
