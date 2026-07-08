@@ -141,14 +141,11 @@ function showPage(p) {
   if (p === 'coordinator') renderCoordinator();
   if (p === 'missions') {
     renderMissionsList();
-    if (map) {
-      google.maps.event.trigger(map, 'resize');
-      renderMapPins();
-    }
+    if (map) { map.invalidateSize(); renderMapPins(); }
   }
   if (p === 'home') {
     renderHome();
-    if (homeMap) renderMapPins();
+    if (homeMap) { homeMap.invalidateSize(); renderMapPins(); }
   }
 }
 
@@ -798,49 +795,46 @@ function renderAll() {
   }
 }
 
-// ===== GOOGLE MAPS =====
-// MAP_OPTIONS must be declared before initMap() because the Maps API
-// calls initMap() as soon as the script loads — before the rest of the
-// file is parsed if using const (which is NOT hoisted).
+// ===== LEAFLET MAPS (OpenStreetMap — no API key required) =====
 var map = null;
 var homeMap = null;
 var mapMarkers = [];
 var homeMapMarkers = [];
 
-var MAP_OPTIONS = {
-  zoom: 5,
-  center: { lat: 39.5, lng: -98.35 },
-  mapTypeControl: false,
-  streetViewControl: false,
-  fullscreenControl: false,
-  styles: [
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', stylers: [{ visibility: 'off' }] }
-  ]
-};
+const MAP_CENTER = [39.5, -98.35];
+const MAP_ZOOM = 4;
+const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById('missions-map'), MAP_OPTIONS);
-  homeMap = new google.maps.Map(document.getElementById('home-map'), MAP_OPTIONS);
+  homeMap = L.map('home-map').setView(MAP_CENTER, MAP_ZOOM);
+  L.tileLayer(TILE_URL, { attribution: TILE_ATTR }).addTo(homeMap);
+
+  map = L.map('missions-map').setView(MAP_CENTER, MAP_ZOOM);
+  L.tileLayer(TILE_URL, { attribution: TILE_ATTR }).addTo(map);
+
   renderMapPins();
 }
 
 async function geocodeAddress(address) {
   const encoded = encodeURIComponent(address);
-  const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encoded}&key=${window.GOOGLE_MAPS_KEY||""}`);
+  const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
+    headers: { 'Accept-Language': 'en', 'User-Agent': 'ReliefConnect/1.0 (volunteerdisasterrelief.com)' }
+  });
   const data = await res.json();
-  if (data.results?.[0]) return data.results[0].geometry.location;
+  if (data?.[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
   return null;
 }
 
 async function renderMapPins() {
   if (!map && !homeMap) return;
-  mapMarkers.forEach(m => m.setMap(null)); mapMarkers = [];
-  homeMapMarkers.forEach(m => m.setMap(null)); homeMapMarkers = [];
+
+  // Clear existing markers
+  mapMarkers.forEach(m => m.remove()); mapMarkers = [];
+  homeMapMarkers.forEach(m => m.remove()); homeMapMarkers = [];
 
   const urgencyColors = { critical: '#C0392B', high: '#E8521A', medium: '#B87F1A', low: '#1A7A4A' };
-  const bounds = new google.maps.LatLngBounds();
-  let hasMarkers = false;
+  const bounds = [];
 
   for (const mission of state.projects.filter(m => m.status !== 'pending_approval')) {
     if (!mission.address) continue;
@@ -849,51 +843,44 @@ async function renderMapPins() {
       if (!mission.coords) continue;
     }
 
-    const pos = typeof mission.coords === 'string' ? JSON.parse(mission.coords) : mission.coords;
+    const coords = typeof mission.coords === 'string' ? JSON.parse(mission.coords) : mission.coords;
+    const lat = coords.lat, lng = coords.lng;
+    if (!lat || !lng) continue;
+
     const color = urgencyColors[mission.urgency] || '#1A2744';
     const total = parseInt(mission.total_tasks) || 0;
     const done = parseInt(mission.completed_tasks) || 0;
     const pct = total ? Math.round(done / total * 100) : 0;
 
-    const markerOptions = {
-      position: pos, title: mission.title,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: color,
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 2,
-        scale: 10
-      }
-    };
+    // Custom circle marker with ! using Leaflet divIcon
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;font-family:Inter,sans-serif">!</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
 
-    const infoContent = `<div style="font-family:Inter,sans-serif;padding:4px;max-width:220px">
+    const popupContent = `<div style="font-family:Inter,sans-serif;padding:4px;min-width:180px">
       <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(mission.title)}</div>
       <div style="font-size:12px;color:#6B7280;margin-bottom:6px">${esc(mission.address)}</div>
-      <div style="font-size:12px;margin-bottom:6px">${pct}% complete · ${esc(mission.status)}</div>
+      <div style="font-size:12px;margin-bottom:8px">${pct}% complete · ${esc(mission.status)}</div>
       <a href="#" onclick="event.preventDefault();viewMission('${mission.id}','missions')" style="font-size:12px;color:#E8521A;font-weight:500;text-decoration:none">View mission →</a>
     </div>`;
 
     [{ m: map, arr: mapMarkers }, { m: homeMap, arr: homeMapMarkers }].forEach(({ m: mapInst, arr }) => {
       if (!mapInst) return;
-      const marker = new google.maps.Marker({ ...markerOptions, map: mapInst });
-      const iw = new google.maps.InfoWindow({ content: infoContent });
-      marker.addListener('click', () => { arr.forEach(x => x._iw?.close()); iw.open(mapInst, marker); });
-      marker._iw = iw;
+      const marker = L.marker([lat, lng], { icon }).addTo(mapInst);
+      marker.bindPopup(popupContent);
       arr.push(marker);
     });
 
-    bounds.extend(pos);
-    hasMarkers = true;
+    bounds.push([lat, lng]);
   }
 
-  if (hasMarkers) {
+  if (bounds.length) {
+    const leafletBounds = L.latLngBounds(bounds);
     [map, homeMap].filter(Boolean).forEach(m => {
-      m.fitBounds(bounds);
-      const l = google.maps.event.addListener(m, 'idle', () => {
-        if (m.getZoom() > 14) m.setZoom(14);
-        google.maps.event.removeListener(l);
-      });
+      m.fitBounds(leafletBounds, { maxZoom: 14, padding: [30, 30] });
     });
   }
 }

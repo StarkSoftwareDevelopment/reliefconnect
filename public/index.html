@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -459,21 +460,10 @@ nav button.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/config.js"></script>
 <script src="app.js"></script>
-<script>
-// Fires if Maps API key is invalid, restricted, or billing is not enabled
-function gm_authFailure() {
-  console.error('[Maps] Authentication failure — API key invalid, restricted, or billing not enabled');
-  ['home-map','missions-map'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.cssText = 'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:#FEF0EA';
-    el.innerHTML = '<div style="font-size:13px;color:#B03D10;font-weight:600;font-family:Inter,sans-serif">⚠ Map authentication failed</div><div style="font-size:12px;color:#6B7280;font-family:Inter,sans-serif;text-align:center;max-width:300px">The Google Maps API key is invalid or restricted. Check the browser console for details.</div>';
-  });
-}
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=" id="maps-script" async defer></script>
-<script>document.getElementById("maps-script").src="https://maps.googleapis.com/maps/api/js?key="+(window.GOOGLE_MAPS_KEY||"")+"&callback=initMap";</script>
+<script>document.addEventListener("DOMContentLoaded", initMap);</script>
 </body>
 </html>
+<!-- This line intentionally left blank -->
